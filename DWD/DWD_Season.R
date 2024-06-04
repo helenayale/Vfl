@@ -1,0 +1,93 @@
+library(ggplot2)
+library(rgdal)
+library(gtools)
+library(raster)
+library(terra)
+
+setwd('D:/GIS_Data/Vfl-oak/')
+
+
+field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
+DWD_names <- c('STEBO', 'STEBV', 'STEF')
+Ann_names <- c('AnnDI', 'AnnPrec', 'FrostDay', 'HotDay', 'HRain30', 'IceDay', 'SumDay')
+S_names <- c('SDI', 'SPrec', 'SSunDur', 'STMax', 'STMean', 'STMin')
+S_file_names <- c('DIMM', 'RSMS', 'SDMS', 'TADXMM', 'TAMM', 'TADNMM')
+
+# plot_i <- 1
+# dwd_i <- 1
+# eval(parse(text = paste('shp <- readOGR("D:/GIS_Data/Vfl-oak/Vfl-detail_parcels/',field_names[plot_i],'-par-wgs84.shp")', sep = '')))
+# # eval(parse(text = paste('file_inv <-  mixedsort(list.files(path = "D:/GIS_Data/Vfl-oak/DWD/', DWD_names[dwd_i], '/", pattern = ".asc$", all.files = TRUE, full.names = FALSE))', sep = '')))
+# # file_inv
+# year <- 2017
+# eval(parse(text = paste('dwd_img <- raster("D:/GIS_Data/Vfl-oak/DWD/',DWD_names[dwd_i],'/ggrids_germany__annual__phenology__',DWD_names[dwd_i],'__', year,'.asc")', sep = '')))
+# dwd_img
+# dwd <- terra::extract(dwd_img, shp, mean, na.rm=TRUE)
+# dwd
+
+season_list <- c('spr', 'sum', 'aut', 'win')
+
+for (plot_i in 1:length(field_names)){
+  for (year in 2017:2022){
+    eval(parse(text = paste('shp <- readOGR("D:/GIS_Data/Vfl-oak/Vfl-detail_parcels/',field_names[plot_i],'-par-wgs84.shp")', sep = '')))
+    for (dwd_i in 1:length(S_names)){
+      folder_name <- S_names[dwd_i]
+      file_name <- S_file_names[dwd_i]
+      for (s_i in 1:4){
+        season <- season_list[s_i]
+        s_num <- s_i + 12
+        eval(parse(text = paste('dwd_img <- raster("D:/GIS_Data/Vfl-oak/DWD/', folder_name,'/', file_name, '_', s_num, '_', year, '_01.asc")', sep = '')))
+        # shp <- spTransform(shp, CRS(proj4string(dwd_img)))
+        dwd <- terra::extract(dwd_img, shp, FUN = table, na.rm=FALSE)
+        par <- shp$Parcel
+        field <- shp$Vfl_name
+        interne<- shp$Interne
+        
+        treat <- shp$Treat_cat
+        if (length(treat) == 0){
+          treat <- 'Unknown'
+        }
+        
+        for (i in 1:length(dwd)){
+          pix_num <- seq(1:length(dwd[[i]]))
+          dat_pix <- data.frame(ID = field_names[plot_i], Field = field[i], Parcel = i, Interne = interne[i], 
+                                year = year, pix = pix_num, Treat = treat[i], season = season)
+          eval(parse(text = paste('dat_pix$', folder_name, '<- dwd[[i]]', sep = '')))
+          
+          if (i == 1){
+            dat_img <- dat_pix
+          }else{
+            dat_img <- rbind(dat_img, dat_pix)
+          }
+        }
+        if (s_i == 1){
+          dat_yr <- dat_img
+        }else{
+          dat_yr <- rbind(dat_yr, dat_img)
+        }
+      }
+      if (dwd_i == 1){
+        new <- dat_yr
+      }else{
+        eval(parse(text = paste('new$', folder_name, '<- dat_yr$', folder_name, sep = '')))
+      }
+      
+    }
+    
+    if(year == 2017){
+      dat_plot <- new
+    }else{
+      dat_plot <- rbind(dat_plot, new)
+    }
+  }
+  
+  if(plot_i == 1){
+    dat_all <- dat_plot
+  }else{
+    dat_all <- rbind(dat_all, dat_plot)
+  }
+  
+}
+
+dat_all
+
+write.csv(dat_all, 'DWD_Season.csv', row.names = FALSE)
