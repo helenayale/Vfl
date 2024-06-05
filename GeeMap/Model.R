@@ -92,10 +92,20 @@ dat_test <- dat_key
 head(dat_test)
 
 
+# # Summarize data
+# sum_data <-
+#   dat_merge %>%
+#   group_by(plot) %>%
+#   summarize(m_sos = mean(sos),
+#             m_eos = mean(eos),
+#             sd_sos = sd(sos),
+#             sd_eso = sd(eos), .groups = 'keep')
+
+
 basic.lm <- lm(sd_sos ~Treat, dat_test)
 
 library(lmerTest) # package to show p-value
-mixed.lmer <- lmer(sd_sos ~Treat + (1|Age) + (1|plot) + (1|year), data = dat_test) # the syntax stays the same, but now the nesting is taken into account
+mixed.lmer <- lmer(sd_sos ~Treat + (1|Age) + (1|plot) + (1|year) - 1, data = dat_test) # the syntax stays the same, but now the nesting is taken into account
 summary(mixed.lmer)
 plot(mixed.lmer) 
 
@@ -125,7 +135,7 @@ pred.mm <- ggpredict(mixed.lmer, terms = c("Treat"))  # this gives overall predi
     geom_ribbon(aes(x = x, ymin = predicted - std.error, ymax = predicted + std.error), 
                 fill = "lightgrey", alpha = 0.5) +  # error band
     geom_boxplot(data = dat_test,                      # adding the raw data (scaled values)
-               aes(x = Treat, y = sd_sos, colour = Age)) + 
+                 aes(x = Treat, y = sd_sos, colour = Age)) + 
     labs(x = "Treatment", y = "SD of SOS", 
          title = "Treatment affects SD of SOS") + 
     theme_minimal()
