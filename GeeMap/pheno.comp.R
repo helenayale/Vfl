@@ -82,7 +82,7 @@ head(dwd_box)
 # melt_sos <- melt(dat_sos, id.vars = "year")
 # melt_eos <- melt(dat_eos, id.vars = "year")
 
-plot_i <- 2
+plot_i <- 1
 plot_names <- c('Gei', 'Loh', 'Roh')
 plot_n <- plot_names[plot_i] 
 
@@ -136,8 +136,12 @@ plt <- ggplot(
   scale_x_continuous(
     breaks = c(2017:2022)
   ) +
-  theme_classic()
+  theme_classic(
+    base_size = 20
+  )
 plt
+
+### Loop for SOS
 
 for (plot_i in 1:length(plot_names)){
   plot_n <- plot_names[plot_i] 
@@ -190,7 +194,9 @@ for (plot_i in 1:length(plot_names)){
     scale_x_continuous(
       breaks = c(2017:2022)
     ) +
-    theme_classic()
+    theme_classic(
+      base_size = 20
+    )
   ggsave(paste('SOS_comp_', plot_n, '.png', sep = ''), plt)
 }
 
@@ -267,7 +273,9 @@ plt <- ggplot(
   scale_x_continuous(
     breaks = c(2017:2022)
   ) +
-  theme_classic()
+  theme_classic(
+    base_size = 20
+  )
 plt
 
 for (plot_i in 1:length(plot_names)){
@@ -321,7 +329,9 @@ for (plot_i in 1:length(plot_names)){
     scale_x_continuous(
       breaks = c(2017:2022)
     ) +
-    theme_classic()
+    theme_classic(
+      base_size = 20
+    )
   ggsave(paste('EOS_comp_', plot_n, '.png', sep = ''), plt)
 }
 

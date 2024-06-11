@@ -7,14 +7,14 @@ field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
 dat_all <- read.csv('Dat_int_pix.csv')
 head(dat_all)
 
-dat_pheno <- read.csv('dat_pheno_pix.csv')
+dat_pheno <- read.csv('dat_pheno_pix_DL.csv')
 head(dat_pheno)
 
-yr = 2017
-plot_i <- 3
+yr = 2020
+plot_i <- 1
 plot_n <- field_names[plot_i]
-par_i <- 3
-pix_i <- 25
+par_i <- 1
+pix_i <- 1
 
 dat_plot <- subset(dat_all, ID == plot_n)
 dat_par <- subset(dat_plot, Parcel == par_i)
@@ -79,8 +79,11 @@ plt <- ggplot(
     size = .8
   ) +
   labs(
-    title = paste("NDVI curve", yr, ',', plot_n, ' Par', par_i, 'Pix', pix_i, sep = " "),
+    title = paste("NDVI curve", yr, ',', plot_n, ' Par', par_i, 'Pix', pix_i, ', DLogistic', sep = " "),
     y = "ndvi", x = "DOY"
   ) +
-  theme_classic()
+  theme_classic(
+    base_size = 20
+  )
+
 plt

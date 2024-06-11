@@ -23,6 +23,7 @@ dat_pheno_DL <- read.csv('dat_pheno_pix_DL.csv')
 dat_pheno_DL$key <- paste(dat_pheno_DL$plot, '_', dat_pheno_DL$parcel, sep = '')
 dat_pheno_DL <- merge(dat_pheno_DL, dat_meta, by = 'key')
 head(dat_pheno_DL)
+dat_pheno_DL <- dat_pheno_DL %>% replace_with_na_at(.vars = 'eos', condition = ~.x < 210) # remove outliers in eos, DL
 
 # dat_pheno_DL <- dat_pheno_DL[!duplicated(dat_pheno_DL), ]
 # write.csv(dat_pheno_DL, 'dat_pheno_pix_DL.csv', row.names = FALSE)
@@ -31,19 +32,20 @@ dat_dwd <- read.csv('DWD_Pheno.csv')
 dat_dwd$key <- paste(dat_dwd$ID, '_', dat_dwd$Parcel, sep = '')
 dat_dwd <- merge(dat_dwd, dat_meta, by = 'key')
 head(dat_dwd)
-colnames(dat_dwd) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix', 'sos', 'eos','fruit', 'Treat')
+colnames(dat_dwd) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix', 'sos', 'eos','fruit', 'Treat', 'Age')
 dat_dwd$los <- dat_dwd$eos - dat_dwd$sos
 
 dat_wek <- read.csv('WekEO.csv')
 dat_wek$key <- paste(dat_wek$ID, '_', dat_wek$Parcel, sep = '')
 dat_wek <- merge(dat_wek, dat_meta, by = 'key')
 head(dat_wek)
-colnames(dat_wek) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix', 'eos', 'eosv', 'sos', 'sosv', 'max', 'maxv', 'Treat')
+colnames(dat_wek) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix', 'eos', 'eosv', 'sos', 'sosv', 'max', 'maxv', 'Treat', 'Age')
 dat_wek$los <- dat_wek$eos - dat_wek$sos
 
 
 ### define data
 dat_merge <- dat_pheno_SG
+head(dat_merge)
 
 ### check data
 set.seed(1234)
@@ -106,6 +108,7 @@ for (key_i in 1:length(key_list)){
   plot <- unique(sub_key$plot)
   par <- unique(sub_key$parcel)
   treat <- unique(sub_key$Treat)
+  age <- unique(sub_key$Age)
   for (yr in 2017:2022){
     sub_yr <- subset(sub_key, year == yr)
     # count number of non-NA pixels
@@ -118,7 +121,7 @@ for (key_i in 1:length(key_list)){
     sd_eos <- sd(sub_yr$eos)
     sd_los <- sd(sub_yr$los)
     
-    new <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los)
+    new <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los, Age = age)
     if (yr == 2017){
       dat_yr <- new
     }else{
@@ -144,6 +147,8 @@ ggdensity(dat_key_sos$sd_sos,
           main = "Density of SOS SD",
           xlab = "DOY")
 
+ggqqplot(dat_key_sos$sd_sos)
+
 ### Shapiro-Wilk test of normality for one variable
 ### p-value > 0.05 assumes normal distribution
 
@@ -151,6 +156,7 @@ sha.test <- shapiro.test(dat_merge$sos)
 if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
 norm
 
+# dat_key_sos <- dat_key_sos[dat_key_sos$year != 2017,]
 compare_means(sd_sos ~ Treat, data = dat_key_sos)
 
 # p <- ggboxplot(dat_key_sos, x = "Treat", y = "sd_sos", 

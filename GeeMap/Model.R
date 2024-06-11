@@ -102,12 +102,15 @@ head(dat_test)
 #             sd_eso = sd(eos), .groups = 'keep')
 
 
-basic.lm <- lm(sd_sos ~Treat, dat_test)
+# basic.lm <- lm(sd_sos ~Treat, dat_test)
 
 library(lmerTest) # package to show p-value
-mixed.lmer <- lmer(sd_sos ~Treat + (1|Age) + (1|plot) + (1|year) - 1, data = dat_test) # the syntax stays the same, but now the nesting is taken into account
-summary(mixed.lmer)
-plot(mixed.lmer) 
+
+mixed.glmer <- glmer(sd_sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_test, family = 'logit') # intercept
+
+
+summary(mixed.glmer)
+plot(mixed.glmer) 
 
 qqnorm(resid(mixed.lmer))
 qqline(resid(mixed.lmer))
