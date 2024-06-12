@@ -2,6 +2,7 @@ library(dplyr)
 library(ggpubr)
 library(ggplot2)
 library(lme4)
+library(lmerTest) # package to show p-value
 
 setwd('D:/GIS_Data/Vfl-oak/GEEMap/')
 field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
@@ -23,6 +24,7 @@ head(dat_pheno_SG)
 dat_pheno_DL <- read.csv('dat_pheno_pix_DL.csv')
 dat_pheno_DL$key <- paste(dat_pheno_DL$plot, '_', dat_pheno_DL$parcel, sep = '')
 dat_pheno_DL <- merge(dat_pheno_DL, dat_meta, by = 'key')
+dat_pheno_DL <- dat_pheno_DL %>% replace_with_na_at(.vars = 'eos', condition = ~.x < 210) # remove outliers in eos, DL
 head(dat_pheno_DL)
 
 # dat_pheno_DL <- dat_pheno_DL[!duplicated(dat_pheno_DL), ]
@@ -43,8 +45,31 @@ colnames(dat_wek) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix
 dat_wek$los <- dat_wek$eos - dat_wek$sos
 
 
-### define data
-dat_merge <- dat_pheno_SG
+################################################################################
+
+###################
+### define data ###
+###      SG     ###
+###################
+
+
+data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_dwd', 'dat_wek')
+title_names <- c('Savitzy-Golay', 'DLogistic', 'DWD-Pheno', 'WekEO-VPP')
+abbr_names <- c('SG', 'DL', 'DWD', 'VPP')
+data_i <- 1
+eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
+head(dat_merge)
+
+
+mixed.lmer <- lmer(sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_merge)  # intercept
+
+summary(mixed.lmer)
+plot(mixed.lmer) 
+
+qqnorm(resid(mixed.lmer))
+qqline(resid(mixed.lmer))
+
+
 
 #### calculate SD of each index
 
@@ -69,7 +94,21 @@ for (key_i in 1:length(key_list)){
     sd_eos <- sd(sub_yr$eos)
     sd_los <- sd(sub_yr$los)
     
-    new <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, Age = age, pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los)
+    # calculate mean of each index
+    m_sos <- mean(sub_yr$sos)
+    m_eos <- mean(sub_yr$eos)
+    m_los <- mean(sub_yr$los)
+    
+    # calculate CV (Coefficient of Variation)
+    cv_sos <- sd_sos/m_sos
+    cv_eos <- sd_eos/m_eos
+    cv_los <- sd_los/m_los
+    
+    new <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, Age = age, 
+                      pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, 
+                      m_sos = m_sos, m_eos = m_eos, m_los = m_los,
+                      sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los, 
+                      cv_sos = cv_sos, cv_eos = cv_eos, cv_los = cv_los)
     if (yr == 2017){
       dat_yr <- new
     }else{
@@ -104,19 +143,21 @@ head(dat_test)
 
 # basic.lm <- lm(sd_sos ~Treat, dat_test)
 
-library(lmerTest) # package to show p-value
 
-mixed.glmer <- glmer(sd_sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_test, family = 'logit') # intercept
+mixed.lmer <- lmer(sd_sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_test) # intercept
 
+# basic.glm <- glm(sd_sos ~ Treat, data = dat_test, family = 'binominal')
+# 
+# mixed.glmer <- glmer(sd_sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_test, family = ) # intercept
 
-summary(mixed.glmer)
-plot(mixed.glmer) 
+summary(mixed.lmer)
+plot(mixed.lmer) 
 
 qqnorm(resid(mixed.lmer))
 qqline(resid(mixed.lmer))
 
-library(cAIC4)
-step <- stepcAIC(mixed.lmer, direction = "backward", trace = TRUE, data = dat_test)
+# library(cAIC4)
+# step <- stepcAIC(mixed.lmer, direction = "backward", trace = TRUE, data = dat_test)
 
 
 (mm_plot <- ggplot(dat_test, aes(x = Treat, y = sd_sos, colour = Treat)) +
