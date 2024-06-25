@@ -24,6 +24,7 @@ head(dat_pheno_SG)
 dat_pheno_DL <- read.csv('dat_pheno_pix_DL.csv')
 dat_pheno_DL$key <- paste(dat_pheno_DL$plot, '_', dat_pheno_DL$parcel, sep = '')
 dat_pheno_DL <- merge(dat_pheno_DL, dat_meta, by = 'key')
+library(naniar)
 dat_pheno_DL <- dat_pheno_DL %>% replace_with_na_at(.vars = 'eos', condition = ~.x < 210) # remove outliers in eos, DL
 head(dat_pheno_DL)
 
@@ -49,25 +50,24 @@ dat_wek$los <- dat_wek$eos - dat_wek$sos
 
 ###################
 ### define data ###
-###      SG     ###
 ###################
 
 
-data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_dwd', 'dat_wek')
-title_names <- c('Savitzy-Golay', 'DLogistic', 'DWD-Pheno', 'WekEO-VPP')
-abbr_names <- c('SG', 'DL', 'DWD', 'VPP')
-data_i <- 1
+data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek')
+title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
+abbr_names <- c('SG', 'DL', 'VPP')
+data_i <- 3
 eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
 head(dat_merge)
 
-
-mixed.lmer <- lmer(sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_merge)  # intercept
-
-summary(mixed.lmer)
-plot(mixed.lmer) 
-
-qqnorm(resid(mixed.lmer))
-qqline(resid(mixed.lmer))
+# 
+# mixed.lmer <- lmer(eos ~ Treat * year + (1|plot), data = dat_merge)  # intercept
+# 
+# summary(mixed.lmer)
+# 
+# mixed.lmer <- lmer(eos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_merge)  # intercept
+# 
+# summary(mixed.lmer)
 
 
 
@@ -126,9 +126,32 @@ for (key_i in 1:length(key_list)){
 dat_key
 summary(dat_key)
 
+dat_key$log_sds <- log(dat_key$sd_sos)
+dat_key$log_sde <- log(dat_key$sd_eos)
+dat_key$log_sdl <- log(dat_key$sd_los)
+
+dat_key$log_cvs <- log(dat_key$cv_sos)
+dat_key$log_cve <- log(dat_key$cv_eos)
+dat_key$log_cvl <- log(dat_key$cv_los)
+
+#### merge plots into two
+dat_key$new_plot <- dat_key$plot
+dat_key$new_plot <- replace(dat_key$new_plot, dat_key$new_plot == 'Loh', 'Roh')
+dat_key$new_plot <- replace(dat_key$new_plot, dat_key$new_plot == 'Roh620', 'Roh')
+dat_key$new_plot <- replace(dat_key$new_plot, dat_key$new_plot == 'Roh635', 'Roh')
+dat_key$new_plot <- replace(dat_key$new_plot, dat_key$new_plot == 'Roh90', 'Roh')
+dat_key$new_plot
+
 
 dat_test <- dat_key
-head(dat_test)
+
+# 
+# dat_test$roh_plot <- dat_test$plot
+# dat_test$roh_plot <- replace(dat_test$roh_plot, dat_test$roh_plot == 'Roh620', 'Roh')
+# dat_test$roh_plot <- replace(dat_test$roh_plot, dat_test$roh_plot == 'Roh635', 'Roh')
+# dat_test$roh_plot <- replace(dat_test$roh_plot, dat_test$roh_plot == 'Roh90', 'Roh')
+# dat_test$roh_plot
+
 
 
 # # Summarize data
@@ -144,13 +167,29 @@ head(dat_test)
 # basic.lm <- lm(sd_sos ~Treat, dat_test)
 
 
-mixed.lmer <- lmer(sd_sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_test) # intercept
+#### Hausman Test
+#### check fixed/random effect
 
-# basic.glm <- glm(sd_sos ~ Treat, data = dat_test, family = 'binominal')
+library(plm)
+# install.packages('plm') 
+fixed <- plm(log_sds ~ Treat, data = dat_test, index = c("year"), model = "within")  #fixed model
+random <- plm(log_sds ~ Treat, data = dat_test, index = c("year"), model = "random")  #random model
+phtest(fixed,random) #Hausman test
+
+# If the p-value is significant (for example <0.05) then use fixed effects, if not use random effects. If p value is slightly larger than 0.05, it may still be better to use fixed effects models.
+summary(fixed)
+summary(random)
+
+
+# mixed.lmer <- lmer(log_sds ~ Treat + year + (1|plot) , data = dat_test) # year as fixed effect
+# summary(mixed.lmer)
 # 
-# mixed.glmer <- glmer(sd_sos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_test, family = ) # intercept
+# mixed.lmer <- lmer(log_sds ~ Treat * year + (1|plot) , data = dat_test) # interaction
+# summary(mixed.lmer)
 
+mixed.lmer <- lmer(log_cvl ~ Treat + new_plot + (1|year), data = dat_test) # year as random effect
 summary(mixed.lmer)
+
 plot(mixed.lmer) 
 
 qqnorm(resid(mixed.lmer))
@@ -265,3 +304,4 @@ pred.mm <- ggpredict(mixed.lmer3, terms = c("Treat"))  # this gives overall pred
          title = "Treatment affects SD of LOS") + 
     theme_minimal()
 )
+
