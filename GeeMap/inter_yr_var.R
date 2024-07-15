@@ -45,3 +45,8 @@ head(dat_wek)
 colnames(dat_wek) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix', 'eos', 'eosv', 'sos', 'sosv', 'max', 'maxv', 'Treat', 'Age')
 dat_wek$los <- dat_wek$eos - dat_wek$sos
 
+### extract sos, eos, max day from WekEO VPP dataset
+
+
+### get the real value that's closest to sos, eos, max day from raw dataset
+
