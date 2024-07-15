@@ -56,18 +56,44 @@ dat_wek$los <- dat_wek$eos - dat_wek$sos
 data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek')
 title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
 abbr_names <- c('SG', 'DL', 'VPP')
-data_i <- 3
+data_i <- 1
 eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
 head(dat_merge)
+
+
+#### merge plots into two
+dat_merge$new_plot <- dat_merge$plot
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Loh', 'Roh')
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh620', 'Roh')
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh635', 'Roh')
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh90', 'Roh')
+dat_merge$new_plot
+
 
 # 
 # mixed.lmer <- lmer(eos ~ Treat * year + (1|plot), data = dat_merge)  # intercept
 # 
 # summary(mixed.lmer)
 # 
-# mixed.lmer <- lmer(eos ~ Treat + (1|Age) + (1|plot) + (1|year), data = dat_merge)  # intercept
-# 
-# summary(mixed.lmer)
+
+#### Hausman Test
+#### check fixed/random effect
+
+library(plm)
+# install.packages('plm') 
+fixed <- plm(sos ~ Treat, data = dat_merge, index = c("year"), model = "within")  #fixed model
+random <- plm(sos ~ Treat, data = dat_merge, index = c("year"), model = "random")  #random model
+phtest(fixed,random) #Hausman test
+
+# If the p-value is significant (for example <0.05) then use fixed effects, if not use random effects. If p value is slightly larger than 0.05, it may still be better to use fixed effects models.
+summary(fixed)
+summary(random)
+
+
+mixed.lmer <- lmer(los ~ Treat + new_plot + (1|year), data = dat_merge)  # intercept
+
+summary(mixed.lmer)
+
 
 
 
@@ -144,6 +170,7 @@ dat_key$new_plot
 
 
 dat_test <- dat_key
+head(dat_test)
 
 # 
 # dat_test$roh_plot <- dat_test$plot
@@ -187,7 +214,7 @@ summary(random)
 # mixed.lmer <- lmer(log_sds ~ Treat * year + (1|plot) , data = dat_test) # interaction
 # summary(mixed.lmer)
 
-mixed.lmer <- lmer(log_cvl ~ Treat + new_plot + (1|year), data = dat_test) # year as random effect
+mixed.lmer <- lmer(log_cvs ~ Treat + new_plot + (1|year), data = dat_test) # year as random effect
 summary(mixed.lmer)
 
 plot(mixed.lmer) 

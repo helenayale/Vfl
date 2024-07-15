@@ -53,9 +53,16 @@ dat_wek$los <- dat_wek$eos - dat_wek$sos
 data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek')
 title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
 abbr_names <- c('SG', 'DL', 'VPP')
-data_i <- 2
+data_i <- 3
 eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
 head(dat_merge)
+
+dat_merge$new_plot <- dat_merge$plot
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Loh', 'Roh')
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh620', 'Roh')
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh635', 'Roh')
+dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh90', 'Roh')
+dat_merge$new_plot
 
 # ### check data
 # set.seed(1234)
@@ -81,6 +88,23 @@ q
 sha.test <- shapiro.test(dat_merge$sos)
 if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
 norm
+sha.test$p.value
+
+library(olsrr)
+model <- lm(sos ~ Treat, data = dat_merge)
+plot(model)
+
+anova(model)
+summary(model)
+
+ols_test_normality(model)
+ols_test_correlation(model)
+ols_plot_resid_fit(model)
+ols_plot_resid_hist(model)
+
+# 
+# mod2 <- lm(sos ~ Treat, data = dat_merge)
+# plot(mod2)
 
 ### Kruskal-Wallis Test
 
@@ -121,46 +145,70 @@ group_by(dat_merge, Treat) %>%
 
 
 
-# 
-# my_comparisons <- list( c("A-Grad", "F-Grad"), c("F-Grad", "Z-Baum"), c("A-Grad", "Z-Baum") )
-# p_sos <- ggboxplot(dat_merge, x = "Treat", y = "sos", 
-#           color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
-#           order = c("A-Grad", "F-Grad", "Z-Baum"), add = "jitter",
-#           ylab = "SOS", xlab = "Treatment", main = paste('Boxplot SOS', abbr_names[data_i], sep = ' '))+ 
-#   stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(160, 160, 165), size = 5)+ # Add pairwise comparisons p-value
-#   stat_compare_means(label.y = 175, size = 5) +    # Add global p-value
-#   theme_classic(base_size = 20)
-# p_sos
-# ggsave(paste('Boxplot_SOS_', abbr_names[data_i], '.png', sep = ''), p_sos)
-# 
-# p_eos <- ggboxplot(dat_merge, x = "Treat", y = "eos", 
-#           color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
-#           order = c("A-Grad", "F-Grad", "Z-Baum"), add = "jitter",
-#           ylab = "EOS", xlab = "Treatment", main = paste('Boxplot EOS', abbr_names[data_i], sep = ' '))+ 
-#   stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(320, 320, 325), size = 5)+ # Add pairwise comparisons p-value
-#   stat_compare_means(label.y = 335, size = 5) +    # Add global p-value
-#   theme_classic(base_size = 20)
-# p_eos
-# ggsave(paste('Boxplot_EOS_', abbr_names[data_i], '.png', sep = ''), p_eos)
-# 
-# p_los <- ggboxplot(dat_merge, x = "Treat", y = "los", 
-#           color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
-#           order = c("A-Grad", "F-Grad", "Z-Baum"), add = "jitter",
-#           ylab = "LOS", xlab = "Treatment", main = paste('Boxplot LOS', abbr_names[data_i], sep = ' '))+ 
-#   stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(200, 200, 205), size = 5)+ # Add pairwise comparisons p-value
-#   stat_compare_means(label.y = 215, size = 5) +    # Add global p-value
-#   theme_classic(base_size = 20)
-# p_los
-# ggsave(paste('Boxplot_LOS_', abbr_names[data_i], '.png', sep = ''), p_los)
+dat_merge$log_sos <- log(dat_merge$sos)
+dat_merge$log_eos <- log(dat_merge$eos)
+dat_merge$log_los <- log(dat_merge$los)
 
 
-# ## As the p-value is less than the significance level 0.05, we can conclude that there are significant differences between the treatment groups.
-# kruskal.test(sos ~ Treat, data = dat_merge)
-# 
-# ## multiple pairwise-comparison between groups
-# pairwise.wilcox.test(dat_merge$sos, dat_merge$Treat,
-#                      p.adjust.method = "BH")
-# 
+### density plot
+p <-  ggdensity(dat_merge$log_sos, 
+                main = paste('Density of Log(SOS), ', title_names[data_i], sep = ''),
+                xlab = "DOY") +
+  theme_classic(base_size = 20)
+p
+
+### QQ plot
+q <- ggqqplot(dat_merge$log_sos,
+              main = paste('QQPlot of Log(SOS), ', title_names[data_i], sep = '')) +
+  theme_classic(base_size = 20)
+q
+
+
+### Shapiro-Wilk test of normality for one variable
+### p-value > 0.05 assumes normal distribution
+
+sha.test <- shapiro.test(dat_merge$log_sos)
+if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
+norm
+
+
+
+my_comparisons <- list( c("A-Grad", "F-Grad"), c("F-Grad", "Z-Baum"), c("A-Grad", "Z-Baum") )
+
+p_sos <-  ggboxplot(dat_merge, x = "Treat", y = "sos", 
+                     color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+                     order = c("A-Grad", "F-Grad", "Z-Baum"), add = "jitter",
+                     ylab = "SOS", xlab = "Treatment", main = paste('Boxplot SOS', abbr_names[data_i], sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(160, 160, 165), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 175, size = 5) +    # Add global anova p-value
+  theme_classic(base_size = 20)
+p_sos
+
+p_eos <-  ggboxplot(dat_merge, x = "Treat", y = "eos", 
+                    color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+                    order = c("A-Grad", "F-Grad", "Z-Baum"), add = "jitter",
+                    ylab = "EOS", xlab = "Treatment", main = paste('Boxplot EOS', abbr_names[data_i], sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(360, 360, 370), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 385, size = 5) +    # Add global anova p-value
+  theme_classic(base_size = 20)
+p_eos
+
+p_los <-  ggboxplot(dat_merge, x = "Treat", y = "los", 
+                    color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+                    order = c("A-Grad", "F-Grad", "Z-Baum"), add = "jitter",
+                    ylab = "LOS", xlab = "Treatment", main = paste('Boxplot LOS', abbr_names[data_i], sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(225, 225, 235), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 250, size = 5) +    # Add global anova p-value
+  theme_classic(base_size = 20)
+p_los
+
+
+
+
+
+
+
+
 
 #### calculate SD of each index
 
@@ -217,8 +265,6 @@ for (key_i in 1:length(key_list)){
 dat_key
 summary(dat_key)
 
-# # sos
-# dat_key_sos <- dat_key[dat_key$pix_sos > 10, ]
 
 ### density plot
 ggdensity(dat_key$sd_sos, 
@@ -247,7 +293,7 @@ dat_key$log_cvl <- log(dat_key$cv_los)
 
 
 ggdensity(dat_key$log_sds, 
-          main = paste('Density of SD SOS, ', title_names[data_i], sep = ''),
+          main = paste('Density of log(SD SOS), ', title_names[data_i], sep = ''),
           xlab = "DOY") +
   theme_classic(base_size = 20)
 
@@ -259,6 +305,15 @@ sha.test <- shapiro.test(dat_key$log_cvl)
 if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
 norm
 sha.test$p.value
+
+library(olsrr)
+model <- lm(log(sd_sos) ~ Treat, data = dat_key)
+plot(model)
+
+ols_test_normality(model)
+ols_test_correlation(model)
+ols_plot_resid_fit(model)
+ols_plot_resid_hist(model)
 
 # dat_key_sos <- dat_key_sos[dat_key_sos$year != 2017,]
 # compare_means(sd_sos ~ Treat, data = dat_key_sos)
