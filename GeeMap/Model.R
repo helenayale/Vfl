@@ -267,8 +267,7 @@ stargazer(mixed.lmer, type = "text",
 
 #### SOS ####
 
-mixed.lmer <- lmer(sd_sos ~Treat + Age + (1|plot) + (1|year), data = dat_test) # the syntax stays the same, but now the nesting is taken into account
-# summary(mixed.lmer)
+mixed.lmer <- lmer(log(sd_sos) ~ Treat + new_plot + (1|year), data = dat_test) # year as random effect
 # plot(mixed.lmer)
 
 # Extract the prediction data frame
@@ -280,7 +279,7 @@ pred.mm <- ggpredict(mixed.lmer, terms = c("Treat"))  # this gives overall predi
     geom_ribbon(aes(x = x, ymin = predicted - std.error, ymax = predicted + std.error), 
                 fill = "lightgrey", alpha = 0.5) +  # error band
     geom_boxplot(data = dat_test,                      # adding the raw data (scaled values)
-                 aes(x = Treat, y = sd_sos, colour = Age)) + 
+                 aes(x = Treat, y = sd_sos, color = Treat )) + 
     labs(x = "Treatment", y = "SD of SOS", 
          title = "Treatment affects SD of SOS") + 
     theme_minimal()
@@ -289,7 +288,7 @@ pred.mm <- ggpredict(mixed.lmer, terms = c("Treat"))  # this gives overall predi
 
 #### EOS ####
 
-mixed.lmer2 <- lmer(sd_eos ~Treat + Age + (1|plot) + (1|year), data = dat_test) # the syntax stays the same, but now the nesting is taken into account
+mixed.lmer2 <- lmer(log(sd_eos) ~ Treat + new_plot + (1|year), data = dat_test) # the syntax stays the same, but now the nesting is taken into account
 summary(mixed.lmer2)
 # plot(mixed.lmer2) 
 
@@ -303,7 +302,7 @@ pred.mm <- ggpredict(mixed.lmer2, terms = c("Treat"))  # this gives overall pred
     geom_ribbon(aes(x = x, ymin = predicted - std.error, ymax = predicted + std.error), 
                 fill = "lightgrey", alpha = 0.5) +  # error band
     geom_boxplot(data = dat_test,                      # adding the raw data (scaled values)
-                 aes(x = Treat, y = sd_eos, colour = Age)) + 
+                 aes(x = Treat, y = sd_eos, colour = Treat)) + 
     labs(x = "Treatment", y = "SD of EOS", 
          title = "Treatment affects SD of EOS") + 
     theme_minimal()
@@ -312,7 +311,7 @@ pred.mm <- ggpredict(mixed.lmer2, terms = c("Treat"))  # this gives overall pred
 
 #### LOS ####
 
-mixed.lmer3 <- lmer(sd_los ~Treat + Age + (1|plot) + (1|year), data = dat_test) # the syntax stays the same, but now the nesting is taken into account
+mixed.lmer3 <- lmer(log(sd_los) ~ Treat + new_plot + (1|year), data = dat_test) # the syntax stays the same, but now the nesting is taken into account
 summary(mixed.lmer3)
 # plot(mixed.lmer3) 
 
@@ -326,7 +325,7 @@ pred.mm <- ggpredict(mixed.lmer3, terms = c("Treat"))  # this gives overall pred
     geom_ribbon(aes(x = x, ymin = predicted - std.error, ymax = predicted + std.error), 
                 fill = "lightgrey", alpha = 0.5) +  # error band
     geom_boxplot(data = dat_test,                      # adding the raw data (scaled values)
-                 aes(x = Treat, y = sd_los, colour = Age)) + 
+                 aes(x = Treat, y = sd_los, colour = Treat)) + 
     labs(x = "Treatment", y = "SD of LOS", 
          title = "Treatment affects SD of LOS") + 
     theme_minimal()

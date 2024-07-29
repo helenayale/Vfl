@@ -64,6 +64,7 @@ dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh635'
 dat_merge$new_plot <- replace(dat_merge$new_plot, dat_merge$new_plot == 'Roh90', 'Roh')
 dat_merge$new_plot
 
+nrow(dat_merge)
 # ### check data
 # set.seed(1234)
 # dplyr::sample_n(dat_merge, 10)
