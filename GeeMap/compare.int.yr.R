@@ -165,7 +165,7 @@ plt <- ggplot(
   data = dat_comp
 ) +
   geom_boxplot(
-    aes(x = year, y = NDVI_sos, group = interaction(year, plot), color = plot)
+    aes(x = year, y = NDVI_eos, group = interaction(year, plot), color = plot)
   )+
   geom_vline(
     aes(xintercept = 2017.45),
@@ -202,5 +202,96 @@ plt <- ggplot(
   ) 
   
 plt
-  
+
+
+plt2 <- ggplot(
+  data = dat_comp
+) +
+  geom_boxplot(
+    aes(x = year, y = sos_r, group = interaction(year, plot), color = plot)
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  )+
+  scale_x_continuous(
+    breaks = c(2017:2022)
+  ) 
+
+plt2
+
+
+
+
+# check the sos and real sos 
+
+plt_check <-  ggplot(
+  data = dat_comp
+) +
+  geom_boxplot(
+    aes(x = year, y = sos_r, group = year, color = 'red')
+  )+
+  geom_boxplot(
+    aes(x = year, y = sos, group = year, color = 'blue')
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  )+
+  scale_x_continuous(
+    breaks = c(2017:2022)
+  ) 
+plt_check
   

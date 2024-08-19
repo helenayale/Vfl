@@ -1,5 +1,6 @@
 library(ggplot2)
 library(phenex)
+library(dplyr)
 
 setwd('D:/GIS_Data/Vfl-oak/GEEMap/')
 field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
@@ -17,8 +18,21 @@ for (plot_i in 1 : length(field_names)){
       sub_year <- subset(sub_par, year == yr)
       for (pix_i in 1:max(sub_year[,'pix'])){
         sub_pix <- subset(sub_year, pix == pix_i)
+        if (yr == 2017){
+          dat <- na.omit(sub_pix)
+          first_day <- dat[1, 'DOY']
+          first_NDVI <- dat[1, 'NDVI']
+          
+          # sub_pix[first_day, 'NDVI']
+          sub_pix[1, 'NDVI'] <- first_NDVI
+          sub_pix[as.integer(first_day)/2, 'NDVI'] <- first_NDVI
+          sub_pix[as.integer(first_day)/3, 'NDVI'] <- first_NDVI
+          # sub_pix[as.integer(first_day)/4, 'NDVI'] <- first_NDVI
+        }
+        
+        
         ndvi <- modelNDVI(sub_pix$NDVI, year.int = yr, 
-                          correction = "none", method = "SavGol", smooth = 50, MARGIN = 2, 
+                          correction = "none", method = "SavGol", smoothing = 10, window.sav = 7, 
                           doParallel = FALSE, slidingperiod = 40)
         greenup <- phenoPhase(ndvi[[1]], phase="greenup", method="local", threshold=0.15, n=1000)
         sos <- phenoPhase(ndvi[[1]], phase="greenup", method="local", threshold=0.5, n=1000)
@@ -57,4 +71,4 @@ for (plot_i in 1 : length(field_names)){
 
 dat_final
 
-write.csv(dat_final, 'dat_pheno_pix_SG.csv', row.names = FALSE)
+write.csv(dat_final, 'dat_pheno_pix_SG_impu.csv', row.names = FALSE)

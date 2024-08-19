@@ -19,7 +19,7 @@ head(dat_all)
 dat_raw <- read.csv('Dat_all_pix_dc.csv')
 head(dat_raw)
 
-dat_pheno_SG <- read.csv('dat_pheno_pix_SG.csv')
+dat_pheno_SG <- read.csv('dat_pheno_pix_SG_impu_bise.csv')
 head(dat_pheno_SG)
 
 dat_pheno_DL <- read.csv('dat_pheno_pix_DL.csv')
@@ -53,9 +53,10 @@ dat_wek$eos <- dat_wek$EOSD
 ###### SOS ######
 #################
 
-dat_SG_box <- dat_pheno_SG[, c('year', 'sos', 'method', 'field')]
-dat_DL_box <- dat_pheno_DL[, c('year', 'sos', 'method', 'field')]
-dat_wek_box <- dat_wek[, c('year', 'sos', 'method', 'field')]
+dat_SG_box <- dat_pheno_SG[, c('year', 'sos', 'method', 'field', 'plot', 'pix', 'parcel')]
+dat_DL_box <- dat_pheno_DL[, c('year', 'sos', 'method', 'field',  'plot', 'pix', 'parcel')]
+dat_wek_box <- dat_wek[, c('year', 'sos', 'method', 'field', 'Field', 'pix', 'Parcel')]
+colnames(dat_wek_box) <- c('year', 'sos', 'method', 'field',  'plot', 'pix', 'parcel')
 dat_box <- rbind(dat_DL_box, dat_SG_box)
 dat_box <- rbind(dat_box, dat_wek_box)
 head(dat_box)
@@ -197,7 +198,7 @@ for (plot_i in 1:length(plot_names)){
     theme_classic(
       base_size = 20
     )
-  ggsave(paste('SOS_comp_', plot_n, '.png', sep = ''), plt)
+  ggsave(paste('SOS_comp_', plot_n, '_bise.png', sep = ''), plt)
 }
 
 #################
@@ -219,7 +220,7 @@ colnames(dwd_box) <- c('year', 'eos', 'method', 'field')
 
 head(dwd_box)
 
-plot_i <- 3
+plot_i <- 2
 plot_names <- c('Gei', 'Loh', 'Roh')
 plot_n <- plot_names[plot_i] 
 
