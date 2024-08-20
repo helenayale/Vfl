@@ -147,8 +147,8 @@ title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
 abbr_names <- c('SG', 'DL', 'VPP')
 
 data_i <- 1
-eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
-head(dat_merge)
+eval(parse(text = paste('dat_def <- ', data_names[data_i], sep = '')))
+head(dat_def)
 
 
 # 
@@ -181,19 +181,26 @@ head(dat_merge)
 # summary(random)
 
 
-#######################################
-##### for SG data, sos remove 2017#####
-#######################################
-# 
-# dat_sos <- subset(dat_merge, dat_merge$year != 2017)
-# mixed.lmer <- lmer(sos ~ Treat + north + spr_temp + STEBO + (1|year), data = dat_sos)  # intercept
-# summary(mixed.lmer)
+####################################
+### random select 1/3 of Roh 635 ###
+####################################
 
-# mixed.lmer <- lmer(eos ~ Treat + north + aut_temp + STEBO + (1|year), data = dat_sos)  # intercept
-# summary(mixed.lmer)
-# 
-# mixed.lmer <- lmer(los ~ Treat + north + spr_temp + aut_temp + DWD_LOS  + (1|year), data = dat_sos)  # intercept
-# summary(mixed.lmer)
+dat_roh635 <- subset(dat_def, plot == 'Roh635')
+head(dat_roh635)
+
+dat_roh635_1 <- subset(dat_roh635, parcel == 1)
+dat_roh635_2 <- subset(dat_roh635, parcel == 2)
+
+dat_other <- subset(dat_def, plot != 'Roh635')
+head(dat_other)
+
+dat_samp1 <- dat_roh635_1 %>% sample_frac(0.33)
+head(dat_samp1)
+dat_samp2 <- dat_roh635_2 %>% sample_frac(0.33)
+head(dat_samp2)
+
+dat_samp <- rbind(dat_samp1, dat_samp2)
+dat_merge <- rbind(dat_other, dat_samp)
 
 
 mixed.lmer <- lmer(sos ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)  # intercept
@@ -537,7 +544,8 @@ abbr_names <- c('SG', 'DL', 'VPP')
 
 for(data_i in 1:3){
   eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
-  head(dat_merge)
+
+
   
   #### calculate SD of each index
   
@@ -607,6 +615,25 @@ for(data_i in 1:3){
   dat_key$log_cvl <- log(dat_key$cv_los)
   
   dat_test <- dat_key
+  
+  # ### random select 1/3 of Roh 635
+  # 
+  # dat_roh635 <- subset(dat_merge, plot == 'Roh635')
+  # 
+  # dat_roh635_1 <- subset(dat_roh635, parcel == 1)
+  # dat_roh635_2 <- subset(dat_roh635, parcel == 2)
+  # 
+  # dat_other <- subset(dat_merge, plot != 'Roh635')
+  # head(dat_other)
+  # 
+  # dat_samp1 <- dat_roh635_1 %>% sample_frac(0.33)
+  # head(dat_samp1)
+  # dat_samp2 <- dat_roh635_2 %>% sample_frac(0.33)
+  # head(dat_samp2)
+  # 
+  # dat_samp <- rbind(dat_samp1, dat_samp2)
+  # dat_merge <- rbind(dat_other, dat_samp)
+  
   
   ### model sos, eos, los
   var_names <- c('sos', 'eos', 'los')
@@ -879,7 +906,7 @@ for(data_i in 1:3){
 
 mod_summary
 
-write.csv(mod_summary, 'mod_sum_aut.csv', row.names = FALSE)
+write.csv(mod_summary, 'mod_sum_sample.csv', row.names = FALSE)
 
 
 ################################################################################
@@ -1418,7 +1445,7 @@ for(data_i in 1:3){
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
-                      sum_temp = sum_temp, sum_p = sum_p, DWD = DWD, DWD_p = DWD_p)
+                      sum_temp = sum_temp, sum_p = sum_p, aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
     if (data_i == 1){
       if(i == 1){
         mod_summary <- new
@@ -1523,7 +1550,7 @@ for(data_i in 1:3){
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
-                      sum_temp = sum_temp, sum_p = sum_p, DWD = DWD, DWD_p = DWD_p)
+                      sum_temp = sum_temp, sum_p = sum_p, aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
     
     mod_summary <- rbind(mod_summary, new)
     
@@ -1623,7 +1650,7 @@ for(data_i in 1:3){
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
-                      sum_temp = sum_temp, sum_p = sum_p, DWD = DWD, DWD_p = DWD_p)
+                      sum_temp = sum_temp, sum_p = sum_p, aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
     
     mod_summary <- rbind(mod_summary, new)
     
@@ -1635,6 +1662,142 @@ for(data_i in 1:3){
 
 mod_summary
 
-write.csv(mod_summary, 'mod_sum_sum.csv', row.names = FALSE)
+write.csv(mod_summary, 'mod_sum_sumaut.csv', row.names = FALSE)
 
 
+
+#############################
+#### Random Sample Roh635 ###
+#############################
+
+
+data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
+title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
+abbr_names <- c('SG', 'DL', 'VPP')
+
+for (run_i in 1:8){
+  for(data_i in 1:3){
+    eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
+    
+    ### random select 1/3 of Roh 635
+    
+    dat_roh635 <- subset(dat_merge, plot == 'Roh635')
+    
+    dat_roh635_1 <- subset(dat_roh635, parcel == 1)
+    dat_roh635_2 <- subset(dat_roh635, parcel == 2)
+    
+    dat_other <- subset(dat_merge, plot != 'Roh635')
+    head(dat_other)
+    
+    dat_samp1 <- dat_roh635_1 %>% sample_frac(0.33)
+    head(dat_samp1)
+    dat_samp2 <- dat_roh635_2 %>% sample_frac(0.33)
+    head(dat_samp2)
+    
+    dat_samp <- rbind(dat_samp1, dat_samp2)
+    dat_merge <- rbind(dat_other, dat_samp)
+    
+    
+    ### model sos, eos, los
+    var_names <- c('sos', 'eos', 'los')
+    for (i in 1:3){
+      var <- var_names[i]
+      if (i == 1){
+        eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+      }else if (i == 2){
+        eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+      }else {
+        eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+      }
+      
+      
+      inter <- summary(mixed.lmer)$coefficients[1,1]
+      p.value <- summary(mixed.lmer)$coefficients[1,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      int_p <- pvalue
+      
+      F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+      p.value <- summary(mixed.lmer)$coefficients[2,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      F_p <- pvalue
+      
+      Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+      p.value <- summary(mixed.lmer)$coefficients[3,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Z_p <- pvalue
+      
+      north <- summary(mixed.lmer)$coefficients[4,1]
+      p.value <- summary(mixed.lmer)$coefficients[4,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      north_p <- pvalue
+      
+      if(i == 1){
+        spr_temp <- summary(mixed.lmer)$coefficients[5,1]
+        p.value <- summary(mixed.lmer)$coefficients[5,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        spr_p <- pvalue
+        
+        aut_temp <- NA
+        aut_p <- NA
+        
+        DWD <- summary(mixed.lmer)$coefficients[6,1]
+        p.value <- summary(mixed.lmer)$coefficients[6,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        DWD_p <- pvalue
+      }else if (i == 2){
+        spr_temp <- NA
+        spr_p <- NA
+        
+        aut_temp <- summary(mixed.lmer)$coefficients[5,1]
+        p.value <- summary(mixed.lmer)$coefficients[5,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        aut_p <- pvalue
+        
+        DWD <- summary(mixed.lmer)$coefficients[6,1]
+        p.value <- summary(mixed.lmer)$coefficients[6,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        DWD_p <- pvalue
+      }else{
+        spr_temp <- summary(mixed.lmer)$coefficients[5,1]
+        p.value <- summary(mixed.lmer)$coefficients[5,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        spr_p <- pvalue
+        
+        aut_temp <- summary(mixed.lmer)$coefficients[6,1]
+        p.value <- summary(mixed.lmer)$coefficients[6,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        aut_p <- pvalue
+        
+        DWD <- summary(mixed.lmer)$coefficients[7,1]
+        p.value <- summary(mixed.lmer)$coefficients[7,5]
+        if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+        DWD_p <- pvalue
+      }
+      
+      
+      new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+                        F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
+                        north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
+                        aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
+      if (data_i == 1){
+        if(i == 1){
+          mod_summary <- new
+        }else{
+          mod_summary <- rbind(mod_summary, new)
+        }
+      }else{
+        mod_summary <- rbind(mod_summary, new)
+      }
+    }
+  }
+  if(run_i == 1){
+    mod_sum <- mod_summary
+  }else{
+    mod_sum <- rbind(mod_sum, mod_summary)
+  }
+}
+
+mod_sum
+
+
+write.csv(mod_sum, 'mod_RS_Roh635_0.5.csv', row.names = FALSE)
