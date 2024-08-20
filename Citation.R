@@ -1,0 +1,2 @@
+RStudio.Version()
+citation()
