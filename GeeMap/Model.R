@@ -124,12 +124,65 @@ head(dat_pheno_DL)
 dat_wek$key <- paste(dat_wek$key, '_', dat_wek$year, sep = '')
 dat_wek <- merge(dat_wek, dat_dwd_m, by = 'key')
 head(dat_wek)
-dat_pheno_VPP <- dat_wek
+
+
+
+# # change Treat to L, M, H
+# dat_pheno_SG$Treat <- replace(dat_pheno_SG$Treat, dat_pheno_SG$Treat == 'A-Grad', 'L')
+# dat_pheno_SG$Treat <- replace(dat_pheno_SG$Treat, dat_pheno_SG$Treat == 'F-Grad', 'M')
+# dat_pheno_SG$Treat <- replace(dat_pheno_SG$Treat, dat_pheno_SG$Treat == 'Z-Baum', 'H')
+# 
+# dat_pheno_DL$Treat <- replace(dat_pheno_DL$Treat, dat_pheno_DL$Treat == 'A-Grad', 'L')
+# dat_pheno_DL$Treat <- replace(dat_pheno_DL$Treat, dat_pheno_DL$Treat == 'F-Grad', 'M')
+# dat_pheno_DL$Treat <- replace(dat_pheno_DL$Treat, dat_pheno_DL$Treat == 'Z-Baum', 'H')
+# 
+# dat_wek$Treat <- replace(dat_wek$Treat, dat_wek$Treat == 'A-Grad', 'L')
+# dat_wek$Treat <- replace(dat_wek$Treat, dat_wek$Treat == 'F-Grad', 'M')
+# dat_wek$Treat <- replace(dat_wek$Treat, dat_wek$Treat == 'Z-Baum', 'H')
+
+# normalize Temperature & DWD
+dat_pheno_SG$spr_temp <- scale(dat_pheno_SG$spr_temp)
+dat_pheno_SG$sum_temp <- scale(dat_pheno_SG$sum_temp)
+dat_pheno_SG$aut_temp <- scale(dat_pheno_SG$aut_temp)
+dat_pheno_SG$win_temp <- scale(dat_pheno_SG$win_temp)
+dat_pheno_SG$STEBO <- scale(dat_pheno_SG$STEBO)
+dat_pheno_SG$STEBV <- scale(dat_pheno_SG$STEBV)
+dat_pheno_SG$DWD_LOS <- scale(dat_pheno_SG$DWD_LOS)
+
+dat_pheno_DL$spr_temp <- scale(dat_pheno_DL$spr_temp)
+dat_pheno_DL$sum_temp <- scale(dat_pheno_DL$sum_temp)
+dat_pheno_DL$aut_temp <- scale(dat_pheno_DL$aut_temp)
+dat_pheno_DL$win_temp <- scale(dat_pheno_DL$win_temp)
+dat_pheno_DL$STEBO <- scale(dat_pheno_DL$STEBO)
+dat_pheno_DL$STEBV <- scale(dat_pheno_DL$STEBV)
+dat_pheno_DL$DWD_LOS <- scale(dat_pheno_DL$DWD_LOS)
+
+dat_wek$spr_temp <- scale(dat_wek$spr_temp)
+dat_wek$sum_temp <- scale(dat_wek$sum_temp)
+dat_wek$aut_temp <- scale(dat_wek$aut_temp)
+dat_wek$win_temp <- scale(dat_wek$win_temp)
+dat_wek$STEBO <- scale(dat_wek$STEBO)
+dat_wek$STEBV <- scale(dat_wek$STEBV)
+dat_wek$DWD_LOS <- scale(dat_wek$DWD_LOS)
+
+# add weight column
+count <- dat_wek  %>% 
+  group_by(Treat = Treat)  %>% 
+  count()
+count
+sum <- sum(count$n)
+
+W_A <- sum/count$n[1]
+W_F <- sum/count$n[2]
+W_Z <- sum/count$n[3]
+
+dat_pheno_SG$weight <- 
 
 # write.csv(dat_pheno_SG, 'dat_mod_SG_impu.csv')
 # write.csv(dat_pheno_DL, 'dat_mod_DL.csv')
 # write.csv(dat_wek, 'dat_mod_VPP.csv')
 
+dat_pheno_VPP <- dat_wek
 # # load data
 # dat_pheno_SG <- read.csv('dat_mod_SG_impu.csv')
 # dat_pheno_DL <- read.csv('dat_mod_DL.csv')
@@ -185,23 +238,24 @@ head(dat_def)
 ### random select 1/3 of Roh 635 ###
 ####################################
 
-dat_roh635 <- subset(dat_def, plot == 'Roh635')
-head(dat_roh635)
+# dat_roh635 <- subset(dat_def, plot == 'Roh635')
+# head(dat_roh635)
+# 
+# dat_roh635_1 <- subset(dat_roh635, parcel == 1)
+# dat_roh635_2 <- subset(dat_roh635, parcel == 2)
+# 
+# dat_other <- subset(dat_def, plot != 'Roh635')
+# head(dat_other)
+# 
+# dat_samp1 <- dat_roh635_1 %>% sample_frac(0.33)
+# head(dat_samp1)
+# dat_samp2 <- dat_roh635_2 %>% sample_frac(0.33)
+# head(dat_samp2)
+# 
+# dat_samp <- rbind(dat_samp1, dat_samp2)
+# dat_merge <- rbind(dat_other, dat_samp)
 
-dat_roh635_1 <- subset(dat_roh635, parcel == 1)
-dat_roh635_2 <- subset(dat_roh635, parcel == 2)
-
-dat_other <- subset(dat_def, plot != 'Roh635')
-head(dat_other)
-
-dat_samp1 <- dat_roh635_1 %>% sample_frac(0.33)
-head(dat_samp1)
-dat_samp2 <- dat_roh635_2 %>% sample_frac(0.33)
-head(dat_samp2)
-
-dat_samp <- rbind(dat_samp1, dat_samp2)
-dat_merge <- rbind(dat_other, dat_samp)
-
+dat_merge <- dat_def
 
 mixed.lmer <- lmer(sos ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)  # intercept
 summary(mixed.lmer)
@@ -633,7 +687,7 @@ for(data_i in 1:3){
   # 
   # dat_samp <- rbind(dat_samp1, dat_samp2)
   # dat_merge <- rbind(dat_other, dat_samp)
-  
+
   
   ### model sos, eos, los
   var_names <- c('sos', 'eos', 'los')
@@ -713,7 +767,7 @@ for(data_i in 1:3){
     
     
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
-                      F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
+                      M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
                       aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
     if (data_i == 1){
@@ -805,7 +859,7 @@ for(data_i in 1:3){
     
     
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
-                      F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
+                      M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
                       aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
  
@@ -892,7 +946,7 @@ for(data_i in 1:3){
     
     
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
-                      F_Grad = F_Grad, F_p = F_p, Z_Baum = Z_Baum, Z_p = Z_p,
+                      M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
                       aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
     
@@ -906,7 +960,7 @@ for(data_i in 1:3){
 
 mod_summary
 
-write.csv(mod_summary, 'mod_sum_sample.csv', row.names = FALSE)
+write.csv(mod_summary, 'mod_sum.csv', row.names = FALSE)
 
 
 ################################################################################
