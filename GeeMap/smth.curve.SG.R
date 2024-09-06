@@ -10,11 +10,11 @@ head(dat_all)
 dat_pheno <- read.csv('dat_pheno_pix_SG_impu.csv')
 head(dat_pheno)
 
-yr = 2018
-plot_i <- 5
+yr = 2020
+plot_i <- 1
 plot_n <- field_names[plot_i]
-par_i <- 2
-pix_i <- 13
+par_i <- 1
+pix_i <- 1
 
 dat_plot <- subset(dat_all, ID == plot_n)
 dat_par <- subset(dat_plot, Parcel == par_i)
@@ -102,7 +102,7 @@ plt <- ggplot(
   ) +
   labs(
     title = paste("NDVI curve", yr, ',', plot_n, ' Par', par_i, 'Pix', pix_i, ', Savitzky-Golay', sep = " "),
-    y = "ndvi", x = "DOY"
+    y = "NDVI", x = "DOY"
   ) +
   theme_classic(
     base_size = 20
