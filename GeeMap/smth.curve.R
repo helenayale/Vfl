@@ -43,7 +43,7 @@ dat_pix_p <- subset(dat_par_p, pix == pix_i)
 dat_year_p <- subset(dat_pix_p, year == yr)
 dat_year_p
 
-gu <- dat_year_p[1, 'greenup']
+# gu <- dat_year_p[1, 'greenup']
 sos <- dat_year_p[1, 'sos']
 eos <- dat_year_p[1, 'eos']
 max <- dat_year_p[1, 'max']
@@ -80,7 +80,7 @@ plt <- ggplot(
   ) +
   labs(
     title = paste("NDVI curve", yr, ',', plot_n, ' Par', par_i, 'Pix', pix_i, ', DLogistic', sep = " "),
-    y = "ndvi", x = "DOY"
+    y = "NDVI", x = "DOY"
   ) +
   theme_classic(
     base_size = 20

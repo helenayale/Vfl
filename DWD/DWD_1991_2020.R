@@ -6,12 +6,10 @@ library(terra)
 
 setwd('D:/GIS_Data/Vfl-oak/')
 
-
 field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
-DWD_names <- c('STEBO', 'STEBV', 'STEF')
-Ann_names <- c('AnnDI', 'AnnPrec', 'FrostDay', 'HotDay', 'HRain30', 'IceDay', 'SumDay')
-S_names <- c('SDI', 'SPrec', 'SSunDur', 'STMax', 'STMean', 'STMin')
-A_file_names <- c('DIMM', 'RSMS', 'TADNCDLT00', 'TADXCDGE30', 'RRDSCDGE30', 'TADXCDLT00', 'TADXCDGE25')
+
+dwd_img <- raster("D:/GIS_Data/Vfl-oak/DWD/raster_rr_1991x2020_jahr.asc")
+dwd_img
 
 
 
@@ -27,14 +25,13 @@ A_file_names <- c('DIMM', 'RSMS', 'TADNCDLT00', 'TADXCDGE30', 'RRDSCDGE30', 'TAD
 # dwd
 
 for (plot_i in 1:length(field_names)){
-  for (year in 2017:2022){
-    eval(parse(text = paste('shp <- readOGR("D:/GIS_Data/Vfl-oak/Vfl-detail_parcels/',field_names[plot_i],'-par-wgs84.shp")', sep = '')))
-    for (dwd_i in 1:length(Ann_names)){
-      folder_name <- Ann_names[dwd_i]
-      file_name <- A_file_names[dwd_i]
-      eval(parse(text = paste('dwd_img <- raster("D:/GIS_Data/Vfl-oak/DWD/',folder_name,'/',file_name,'_17_', year,'_01.asc")', sep = '')))
-      # shp <- spTransform(shp, CRS(proj4string(dwd_img)))
-      dwd <- terra::extract(dwd_img, shp, FUN = table, na.rm=FALSE)
+  eval(parse(text = paste('shp <- readOGR("D:/GIS_Data/Vfl-oak/Vfl-detail_parcels/',field_names[plot_i],'-par-wgs84.shp")', sep = '')))
+  
+      img_prec <- raster("D:/GIS_Data/Vfl-oak/DWD/raster_rr_1991x2020_jahr.asc")
+      img_temp <- raster("D:/GIS_Data/Vfl-oak/DWD/raster_tm_1991x2020_jahr.asc")
+      shp <- spTransform(shp, CRS(proj4string(dwd_img)))
+      dwd_prec <- terra::extract(img_prec, shp, FUN = table, na.rm=FALSE)
+      dwd_temp <- terra::extract(img_temp, shp, FUN = table, na.rm=FALSE)
       par <- shp$Parcel
       field <- shp$Vfl_name
       interne<- shp$Interne
@@ -44,11 +41,10 @@ for (plot_i in 1:length(field_names)){
         treat <- 'Unknown'
       }
       
-      for (i in 1:length(dwd)){
-        pix_num <- seq(1:length(dwd[[i]]))
+      for (i in 1:length(dwd_prec)){
+        pix_num <- seq(1:length(dwd_prec[[i]]))
         dat_pix <- data.frame(ID = field_names[plot_i], Field = field[i], Parcel = i, Interne = interne[i], 
-                              year = year, pix = pix_num, Treat = treat[i])
-        eval(parse(text = paste('dat_pix$', folder_name, '<- dwd[[i]]', sep = '')))
+                              pix = pix_num, Treat = treat[i], prec = dwd_prec[[i]], temp = dwd_temp[[i]])
         
         if (i == 1){
           dat_img <- dat_pix
@@ -57,29 +53,20 @@ for (plot_i in 1:length(field_names)){
         }
       }
       
-      if (dwd_i == 1){
-        new <- dat_img
+      if (plot_i == 1){
+        dat_all <- dat_img
       }else{
-        eval(parse(text = paste('new$', folder_name, '<- dat_img$', folder_name, sep = '')))
+        dat_all <- rbind(dat_all, dat_img)
       }
-      
-    }
-    
-    if(year == 2017){
-      dat_plot <- new
-    }else{
-      dat_plot <- rbind(dat_plot, new)
-    }
-  }
-  
-  if(plot_i == 1){
-    dat_all <- dat_plot
-  }else{
-    dat_all <- rbind(dat_all, dat_plot)
-  }
   
 }
 
 dat_all
 
-write.csv(dat_all, 'DWD_Ann.csv', row.names = FALSE)
+write.csv(dat_all, 'DWD_1991_2020.csv', row.names = FALSE)
+
+dat_climate <- read.csv('DWD_1991_2020.csv')
+head(dat_climate)
+
+
+ggplot(data = dat_climate) + geom_boxplot(aes(x = temp, color = ID, group = ID ))

@@ -21,6 +21,12 @@ dat_pheno_SG <- read.csv('dat_pheno_pix_SG_impu.csv')
 dat_pheno_SG$key <- paste(dat_pheno_SG$plot, '_', dat_pheno_SG$parcel, sep = '')
 dat_pheno_SG <- merge(dat_pheno_SG, dat_meta, by = 'key')
 head(dat_pheno_SG)
+
+dat <- dat_pheno_SG
+count <- dat  %>% 
+  group_by(Treat = Treat)  %>% 
+  count()
+count
 # # remove sos in 2017
 # dat_pheno_SG$sos <- replace(dat_pheno_SG$sos, dat_pheno_SG$year == 2017, 'NA')
 # head(dat_pheno_SG)
@@ -60,7 +66,7 @@ dat_wek <- merge(dat_wek, dat_meta, by = 'key')
 head(dat_wek)
 colnames(dat_wek) <- c('key', 'plot', 'field', 'parcel', 'interne', 'year', 'pix', 'eos', 'eosv', 'sos', 'sosv', 'max', 'maxv', 'Treat', 'Age')
 dat_wek$los <- dat_wek$eos - dat_wek$sos
-
+head(dat_wek)
 
 # merge plots into two: North & Middle
 dat_wek$north <- dat_wek$plot
@@ -165,24 +171,40 @@ dat_wek$STEBO <- scale(dat_wek$STEBO)
 dat_wek$STEBV <- scale(dat_wek$STEBV)
 dat_wek$DWD_LOS <- scale(dat_wek$DWD_LOS)
 
+
 # add weight column
-count <- dat_wek  %>% 
-  group_by(Treat = Treat)  %>% 
-  count()
-count
-sum <- sum(count$n)
+dat_pheno_VPP <- dat_wek
+data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
+abbr_names <- c('SG', 'DL', 'VPP')
 
-W_A <- sum/count$n[1]
-W_F <- sum/count$n[2]
-W_Z <- sum/count$n[3]
+for(data_i in 1:3){
+  eval(parse(text = paste('dat <- ', data_names[data_i], sep = '')))
+  count <- dat  %>% 
+    group_by(Treat = Treat)  %>% 
+    count()
+  count
+  sum <- sum(count$n)
+  
+  W_A <- sum/count$n[1]
+  W_F <- sum/count$n[2]
+  W_Z <- sum/count$n[3]
+  
+  dat$weight[dat$Treat == 'A-Grad'] <- W_A
+  dat$weight[dat$Treat == 'F-Grad'] <- W_F
+  dat$weight[dat$Treat == 'Z-Baum'] <- W_Z
+  
+  eval(parse(text = paste(data_names[data_i], '<- dat', sep = '')))
+}
 
-dat_pheno_SG$weight <- 
+head(dat_pheno_SG)
+head(dat_pheno_DL)
+head(dat_pheno_VPP)
 
 # write.csv(dat_pheno_SG, 'dat_mod_SG_impu.csv')
 # write.csv(dat_pheno_DL, 'dat_mod_DL.csv')
-# write.csv(dat_wek, 'dat_mod_VPP.csv')
+# write.csv(dat_pheno_VPP, 'dat_mod_VPP.csv')
+# 
 
-dat_pheno_VPP <- dat_wek
 # # load data
 # dat_pheno_SG <- read.csv('dat_mod_SG_impu.csv')
 # dat_pheno_DL <- read.csv('dat_mod_DL.csv')
@@ -199,7 +221,7 @@ data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
 title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
 abbr_names <- c('SG', 'DL', 'VPP')
 
-data_i <- 1
+data_i <- 2
 eval(parse(text = paste('dat_def <- ', data_names[data_i], sep = '')))
 head(dat_def)
 
@@ -214,10 +236,11 @@ head(dat_def)
 #### check fixed/random effect
 
 # library(plm)
-# # install.packages('plm') 
-# # test year
-# fixed <- plm(sos ~ Treat, data = dat_merge, index = c("year"), model = "within")  #fixed model
-# random <- plm(sos ~ Treat, data = dat_merge, index = c("year"), model = "random")  #random model
+# install.packages('plm')
+# test year
+# dat_merge$year2 <- as.factor(dat_merge$year)
+# fixed <- plm(sos ~ Treat, data = dat_merge, index = c("year2"), model = "within")  #fixed model
+# random <- plm(sos ~ Treat, data = dat_merge, index = c("year2"), model = "random")  #random model
 # phtest(fixed,random) #Hausman test
 # 
 # # If the p-value is significant (for example <0.05) then use fixed effects, if not use random effects. If p value is slightly larger than 0.05, it may still be better to use fixed effects models.
@@ -257,8 +280,26 @@ head(dat_def)
 
 dat_merge <- dat_def
 
-mixed.lmer <- lmer(sos ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)  # intercept
+mixed.lmer <- lmer(sos ~ Treat + north + spr_temp + STEBO  + (1|year), weight = weight, data = dat_merge)  # intercept
 summary(mixed.lmer)
+
+r.squaredGLMM(mixed.lmer)
+
+
+mixed.lmer <- lm(sos ~ Treat + north + spr_temp + STEBO, weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
+
+mixed.lmer <- lm(eos ~ Treat + north + aut_temp  + STEBV, weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
+
+
+mixed.lmer <- lmer(eos ~ Treat + north + aut_temp * STEBV  + (1|year), weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
+
+
+mixed.lmer <- lmer(los ~ Treat + north + spr_temp * aut_temp * DWD_LOS  + (1|year), weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
+
 summary(mixed.lmer)$coefficients
 inter <- summary(mixed.lmer)$coefficients[1,1]
 p.value <- summary(mixed.lmer)$coefficients[1,5]
@@ -311,6 +352,8 @@ if (data_i == 1){
 mixed.lmer <- lmer(eos ~ Treat + north + aut_temp + STEBV + (1|year), data = dat_merge)  # intercept
 summary(mixed.lmer)
 
+# mixed.lmer <- lm(sos ~ Treat + north + aut_temp + STEBV + year, data = dat_merge)  # intercept
+# summary(mixed.lmer)
 
 
 mixed.lmer <- lmer(los ~ Treat + north + spr_temp +  aut_temp + DWD_LOS  + (1|year), data = dat_merge)  # intercept
@@ -694,12 +737,20 @@ for(data_i in 1:3){
   for (i in 1:3){
     var <- var_names[i]
     if (i == 1){
-      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), weight = weight, data = dat_merge)', sep = '')))
     }else if (i == 2){
-      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBO  + (1|year), weight = weight, data = dat_merge)', sep = '')))
     }else {
-      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + STEBO  + (1|year), weight = weight, data = dat_merge)', sep = '')))
     }
+    
+    # if (i == 1){
+    #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+    # }else if (i == 2){
+    #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+    # }else {
+    #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+    # }
     
     
     inter <- summary(mixed.lmer)$coefficients[1,1]
@@ -960,7 +1011,7 @@ for(data_i in 1:3){
 
 mod_summary
 
-write.csv(mod_summary, 'mod_sum.csv', row.names = FALSE)
+write.csv(mod_summary, 'mod_sum_no_weight.csv', row.names = FALSE)
 
 
 ################################################################################

@@ -17,7 +17,7 @@ head(sub_dat)
 dat_meta <- read.csv('meta_data.csv')
 dat_meta
 
-dat_pheno_SG <- read.csv('dat_pheno_pix_SG.csv')
+dat_pheno_SG <- read.csv('dat_pheno_pix_SG_impu.csv')
 dat_pheno_SG$key <- paste(dat_pheno_SG$plot, '_', dat_pheno_SG$parcel, sep = '')
 dat_pheno_SG <- merge(dat_pheno_SG, dat_meta, by = 'key')
 head(dat_pheno_SG)

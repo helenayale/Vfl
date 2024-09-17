@@ -50,7 +50,7 @@ dat_wek$los <- dat_wek$eos - dat_wek$sos
 data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek', 'dat_dwd')
 title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP', 'DWD')
 abbr_names <- c('SG', 'DL', 'VPP', 'DWD')
-data_i <- 3
+data_i <- 1
 eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
 head(dat_merge)
 
@@ -160,6 +160,8 @@ for (yr in 2017:2022){
 }
 
 dat_comp
+head(dat_comp)
+dat_comp[dat_comp$plot == 'Loh',]
 
 plt <- ggplot(
   data = dat_comp
@@ -199,6 +201,57 @@ plt <- ggplot(
   )+
   scale_x_continuous(
     breaks = c(2017:2022)
+  ) +
+  labs(
+    title = "Interannual Comparison",
+    y = "NDVI_EOS", x = "DOY"
+  ) 
+  
+plt
+
+
+plt <- ggplot(
+  data = dat_comp
+) +
+  geom_boxplot(
+    aes(x = year, y = NDVI_eos, group = interaction(year, plot), color = plot)
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  )+
+  scale_x_continuous(
+    breaks = c(2017:2022)
+  ) +
+  labs(
+    title = "Interannual Comparison",
+    y = "NDVI_EOS", x = "DOY"
   ) 
   
 plt
@@ -208,7 +261,7 @@ plt2 <- ggplot(
   data = dat_comp
 ) +
   geom_boxplot(
-    aes(x = year, y = sos_r, group = interaction(year, plot), color = plot)
+    aes(x = year, y = sosr, group = interaction(year, plot), color = plot)
   )+
   geom_vline(
     aes(xintercept = 2017.45),
@@ -242,23 +295,30 @@ plt2 <- ggplot(
   )+
   scale_x_continuous(
     breaks = c(2017:2022)
+  ) +
+  labs(
+    title = "Interannual Comparison",
+    y = "NDVI_SOS", x = "DOY"
   ) 
 
 plt2
 
 
 
+mixed.lmer <- lm(NDVI_sos ~ as.factor(year) - 1, data = dat_comp) 
+summary(mixed.lmer)
 
-# check the sos and real sos 
+mixed.lmer <- lm(sos ~ as.factor(year) - 1, data = dat_comp) 
+summary(mixed.lmer)
 
-plt_check <-  ggplot(
+
+
+
+plt <- ggplot(
   data = dat_comp
 ) +
   geom_boxplot(
-    aes(x = year, y = sos_r, group = year, color = 'red')
-  )+
-  geom_boxplot(
-    aes(x = year, y = sos, group = year, color = 'blue')
+    aes(x = year, y = NDVI_eos, group = year, color = year)
   )+
   geom_vline(
     aes(xintercept = 2017.45),
@@ -292,6 +352,10 @@ plt_check <-  ggplot(
   )+
   scale_x_continuous(
     breaks = c(2017:2022)
+  ) +
+  labs(
+    title = "Interannual Comparison",
+    y = "NDVI_EOS", x = "DOY"
   ) 
-plt_check
-  
+
+plt

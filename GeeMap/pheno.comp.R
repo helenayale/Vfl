@@ -61,6 +61,11 @@ dat_box <- rbind(dat_DL_box, dat_SG_box)
 dat_box <- rbind(dat_box, dat_wek_box)
 head(dat_box)
 
+x <- dat_wek[Field == 'Gei']$sos 
+y <- dat_pheno_SG$sos
+plot(y~x)
+
+
 # dat_pheno_SG$key <- paste(dat_pheno_SG$plot, '_', dat_pheno_SG$parcel, '_', dat_pheno_SG$year, sep = '')
 # dat_pheno_DL$key <- paste(dat_pheno_DL$plot, '_', dat_pheno_DL$parcel, '_', dat_pheno_DL$year, sep = '')
 # dat_dwd$key <- paste(dat_dwd$ID, '_', dat_dwd$Parcel, '_', dat_dwd$year, sep = '')
@@ -220,7 +225,7 @@ colnames(dwd_box) <- c('year', 'eos', 'method', 'field')
 
 head(dwd_box)
 
-plot_i <- 2
+plot_i <- 1
 plot_names <- c('Gei', 'Loh', 'Roh')
 plot_n <- plot_names[plot_i] 
 
