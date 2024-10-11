@@ -8,23 +8,13 @@ setwd('D:/GIS_Data/Vfl-oak/')
 
 
 field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
-DWD_names <- c('STEBO', 'STEBV', 'STEF')
-Ann_names <- c('AnnDI', 'AnnPrec', 'FrostDay', 'HotDay', 'HRain30', 'IceDay', 'SumDay')
-S_names <- c('SDI', 'SPrec', 'SSunDur', 'STMax', 'STMean', 'STMin')
-A_file_names <- c('DIMM', 'RSMS', 'TADNCDLT00', 'TADXCDGE30', 'RRDSCDGE30', 'TADXCDLT00', 'TADXCDGE25')
+# DWD_names <- c('STEBO', 'STEBV', 'STEF')
+Ann_names <- c('AnnDI', 'AnnPrec', 'AnnTMean', 'FrostDay', 'HotDay', 'HRain30', 'IceDay', 'SumDay')
+# S_names <- c('SDI', 'SPrec', 'SSunDur', 'STMax', 'STMean', 'STMin')
+A_file_names <- c('DIMM', 'RSMS', 'TAMM', 'TADNCDLT00', 'TADXCDGE30', 'RRDSCDGE30', 'TADXCDLT00', 'TADXCDGE25')
 
 
 
-# plot_i <- 1
-# dwd_i <- 1
-# eval(parse(text = paste('shp <- readOGR("D:/GIS_Data/Vfl-oak/Vfl-detail_parcels/',field_names[plot_i],'-par-wgs84.shp")', sep = '')))
-# # eval(parse(text = paste('file_inv <-  mixedsort(list.files(path = "D:/GIS_Data/Vfl-oak/DWD/', DWD_names[dwd_i], '/", pattern = ".asc$", all.files = TRUE, full.names = FALSE))', sep = '')))
-# # file_inv
-# year <- 2017
-# eval(parse(text = paste('dwd_img <- raster("D:/GIS_Data/Vfl-oak/DWD/',DWD_names[dwd_i],'/ggrids_germany__annual__phenology__',DWD_names[dwd_i],'__', year,'.asc")', sep = '')))
-# dwd_img
-# dwd <- terra::extract(dwd_img, shp, mean, na.rm=TRUE)
-# dwd
 
 for (plot_i in 1:length(field_names)){
   for (year in 2017:2022){

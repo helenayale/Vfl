@@ -19,7 +19,7 @@ head(dat_all)
 dat_raw <- read.csv('Dat_all_pix_dc.csv')
 head(dat_raw)
 
-dat_pheno_SG <- read.csv('dat_pheno_pix_SG_impu_bise.csv')
+dat_pheno_SG <- read.csv('dat_pheno_pix_SG_impu.csv')
 head(dat_pheno_SG)
 
 dat_pheno_DL <- read.csv('dat_pheno_pix_DL.csv')
@@ -61,10 +61,19 @@ dat_box <- rbind(dat_DL_box, dat_SG_box)
 dat_box <- rbind(dat_box, dat_wek_box)
 head(dat_box)
 
-x <- dat_wek[Field == 'Gei']$sos 
-y <- dat_pheno_SG$sos
-plot(y~x)
+test_SG <- dat_SG_box[dat_SG_box$year == 2022,]
+test_SG <- subset(test_SG, plot == 'Gei')
+test_SG <- subset(test_SG, parcel == 1)
+head(test_SG)
 
+test_wek <- dat_wek_box[dat_wek_box$year == 2022,]
+test_wek <- subset(test_wek, field == 'Gei')
+test_wek <- subset(test_wek, parcel == 1)
+head(test_wek)
+
+y <- test_SG$sos
+x <- test_wek$sos
+plot(y~x)
 
 # dat_pheno_SG$key <- paste(dat_pheno_SG$plot, '_', dat_pheno_SG$parcel, '_', dat_pheno_SG$year, sep = '')
 # dat_pheno_DL$key <- paste(dat_pheno_DL$plot, '_', dat_pheno_DL$parcel, '_', dat_pheno_DL$year, sep = '')
@@ -88,7 +97,7 @@ head(dwd_box)
 # melt_sos <- melt(dat_sos, id.vars = "year")
 # melt_eos <- melt(dat_eos, id.vars = "year")
 
-plot_i <- 1
+plot_i <- 3
 plot_names <- c('Gei', 'Loh', 'Roh')
 plot_n <- plot_names[plot_i] 
 
