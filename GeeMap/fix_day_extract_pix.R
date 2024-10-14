@@ -36,7 +36,7 @@ for (plot_i in 1 : length(field_names)){
         D306 <- ndvi[[1]]@'modelledValues'[306]
         
         
-        new <- data.frame(plot = plot, parcel = par_i, year = yr, pix = pix_i, DOY = DOY,
+        new <- data.frame(plot = plot, parcel = par_i, year = yr, pix = pix_i,
                           D90 = D90, D106 = D106, D120 = D120, D168 = D168, D182 = D182, D278 = D278, D292 = D292, D306 = D306)
         
         if (pix_i == 1){
@@ -114,7 +114,7 @@ for (plot_i in 1 : length(field_names)){
         D306 <- ndvi[[1]]@'modelledValues'[306]
         
         
-        new <- data.frame(plot = plot, parcel = par_i, year = yr, pix = pix_i, DOY = DOY,
+        new <- data.frame(plot = plot, parcel = par_i, year = yr, pix = pix_i,
                           D90 = D90, D106 = D106, D120 = D120, D168 = D168, D182 = D182, D278 = D278, D292 = D292, D306 = D306)
         
         if (pix_i == 1){
