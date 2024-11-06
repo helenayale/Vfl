@@ -4,6 +4,7 @@ library(ggplot2)
 library(lme4)
 library(lmerTest) # package to show p-value
 library(naniar)
+library(MuMIn)
 
 setwd('D:/GIS_Data/Vfl-oak/GEEMap/')
 field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
@@ -505,10 +506,14 @@ for(data_i in 1:2){
     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
     DWD_p <- pvalue
     
+    r_sq_val <- r.squaredGLMM(mixed.lmer)
+    r_sq_m <- r_sq_val[1,1]
+    r_sq_c <- r_sq_val[1,2]
+    
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, temp = temp, temp_p = temp_p,
-                      DWD = DWD, DWD_p = DWD_p)
+                      DWD = DWD, DWD_p = DWD_p, r_sq_m = r_sq_m, r_sq_c = r_sq_c)
     if (data_i == 1){
       if(i == 1){
         mod_summary <- new
@@ -565,11 +570,14 @@ for(data_i in 1:2){
     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
     DWD_p <- pvalue
     
+    r_sq_val <- r.squaredGLMM(mixed.lmer)
+    r_sq_m <- r_sq_val[1,1]
+    r_sq_c <- r_sq_val[1,2]
  
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, temp = temp, temp_p = temp_p,
-                      DWD = DWD, DWD_p = DWD_p)
+                      DWD = DWD, DWD_p = DWD_p, r_sq_m = r_sq_m, r_sq_c = r_sq_c)
     
     mod_summary <- rbind(mod_summary, new)
     
@@ -580,6 +588,6 @@ for(data_i in 1:2){
 
 mod_summary
 
-write.csv(mod_summary, 'mod_sum_fix_day.csv', row.names = FALSE)
+write.csv(mod_summary, 'mod_sum_fix_day_r_sq.csv', row.names = FALSE)
 
 

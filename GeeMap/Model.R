@@ -4,6 +4,7 @@ library(ggplot2)
 library(lme4)
 library(lmerTest) # package to show p-value
 library(naniar)
+library(MuMIn)
 
 setwd('D:/GIS_Data/Vfl-oak/GEEMap/')
 field_names <- c('Gei', 'Loh', 'Roh90', 'Roh620', 'Roh635')
@@ -157,30 +158,60 @@ head(dat_wek)
 # dat_wek$Treat <- replace(dat_wek$Treat, dat_wek$Treat == 'F-Grad', 'M')
 # dat_wek$Treat <- replace(dat_wek$Treat, dat_wek$Treat == 'Z-Baum', 'H')
 
+
+###################################################################
+# record the SD before normalization
+dat_name <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek')
+var_name <- c('spr_temp', 'sum_temp', 'aut_temp', 'win_temp', 'STEBO', 'STEBV', 'DWD_LOS')
+
+for(dat_i in 1:length(dat_name )){
+  dat <- dat_name[dat_i]
+  for(var_i in 1:length(var_name)){
+    var <- var_name[var_i]
+    eval(parse(text = paste('sd <- sd(', dat, '$', var, ')', sep = '')))
+    eval(parse(text = paste('mean <- mean(', dat, '$', var, ')', sep = '')))
+    new <- data.frame(data = dat, var = var, mean = mean, sd = sd)
+    if(var_i == 1){
+      dat_var <- new
+    }else{
+      dat_var <- rbind(dat_var, new)
+    }
+  }
+  if(dat_i == 1){
+    dat_sd <- dat_var
+  }else{
+    dat_sd <- rbind(dat_sd, dat_var)
+  }
+}
+dat_sd
+write.csv(dat_sd, 'dat_sd.csv', row.names = FALSE)
+
+
+################################################################################
 # normalize Temperature & DWD
-dat_pheno_SG$spr_temp <- scale(dat_pheno_SG$spr_temp)
-dat_pheno_SG$sum_temp <- scale(dat_pheno_SG$sum_temp)
-dat_pheno_SG$aut_temp <- scale(dat_pheno_SG$aut_temp)
-dat_pheno_SG$win_temp <- scale(dat_pheno_SG$win_temp)
-dat_pheno_SG$STEBO <- scale(dat_pheno_SG$STEBO)
-dat_pheno_SG$STEBV <- scale(dat_pheno_SG$STEBV)
-dat_pheno_SG$DWD_LOS <- scale(dat_pheno_SG$DWD_LOS)
+dat_pheno_SG$spr_temp <- scale(dat_pheno_SG$spr_temp, center = TRUE, scale = TRUE)
+dat_pheno_SG$sum_temp <- scale(dat_pheno_SG$sum_temp, center = TRUE, scale = TRUE)
+dat_pheno_SG$aut_temp <- scale(dat_pheno_SG$aut_temp, center = TRUE, scale = TRUE)
+dat_pheno_SG$win_temp <- scale(dat_pheno_SG$win_temp, center = TRUE, scale = TRUE)
+dat_pheno_SG$STEBO <- scale(dat_pheno_SG$STEBO, center = TRUE, scale = TRUE)
+dat_pheno_SG$STEBV <- scale(dat_pheno_SG$STEBV, center = TRUE, scale = TRUE)
+dat_pheno_SG$DWD_LOS <- scale(dat_pheno_SG$DWD_LOS, center = TRUE, scale = TRUE)
 
-dat_pheno_DL$spr_temp <- scale(dat_pheno_DL$spr_temp)
-dat_pheno_DL$sum_temp <- scale(dat_pheno_DL$sum_temp)
-dat_pheno_DL$aut_temp <- scale(dat_pheno_DL$aut_temp)
-dat_pheno_DL$win_temp <- scale(dat_pheno_DL$win_temp)
-dat_pheno_DL$STEBO <- scale(dat_pheno_DL$STEBO)
-dat_pheno_DL$STEBV <- scale(dat_pheno_DL$STEBV)
-dat_pheno_DL$DWD_LOS <- scale(dat_pheno_DL$DWD_LOS)
+dat_pheno_DL$spr_temp <- scale(dat_pheno_DL$spr_temp, center = TRUE, scale = TRUE)
+dat_pheno_DL$sum_temp <- scale(dat_pheno_DL$sum_temp, center = TRUE, scale = TRUE)
+dat_pheno_DL$aut_temp <- scale(dat_pheno_DL$aut_temp, center = TRUE, scale = TRUE)
+dat_pheno_DL$win_temp <- scale(dat_pheno_DL$win_temp, center = TRUE, scale = TRUE)
+dat_pheno_DL$STEBO <- scale(dat_pheno_DL$STEBO, center = TRUE, scale = TRUE)
+dat_pheno_DL$STEBV <- scale(dat_pheno_DL$STEBV, center = TRUE, scale = TRUE)
+dat_pheno_DL$DWD_LOS <- scale(dat_pheno_DL$DWD_LOS, center = TRUE, scale = TRUE)
 
-dat_wek$spr_temp <- scale(dat_wek$spr_temp)
-dat_wek$sum_temp <- scale(dat_wek$sum_temp)
-dat_wek$aut_temp <- scale(dat_wek$aut_temp)
-dat_wek$win_temp <- scale(dat_wek$win_temp)
-dat_wek$STEBO <- scale(dat_wek$STEBO)
-dat_wek$STEBV <- scale(dat_wek$STEBV)
-dat_wek$DWD_LOS <- scale(dat_wek$DWD_LOS)
+dat_wek$spr_temp <- scale(dat_wek$spr_temp, center = TRUE, scale = TRUE)
+dat_wek$sum_temp <- scale(dat_wek$sum_temp, center = TRUE, scale = TRUE)
+dat_wek$aut_temp <- scale(dat_wek$aut_temp, center = TRUE, scale = TRUE)
+dat_wek$win_temp <- scale(dat_wek$win_temp, center = TRUE, scale = TRUE)
+dat_wek$STEBO <- scale(dat_wek$STEBO, center = TRUE, scale = TRUE)
+dat_wek$STEBV <- scale(dat_wek$STEBV, center = TRUE, scale = TRUE)
+dat_wek$DWD_LOS <- scale(dat_wek$DWD_LOS, center = TRUE, scale = TRUE)
 
 
 # add weight column
@@ -240,7 +271,7 @@ data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
 title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
 abbr_names <- c('SG', 'DL', 'VPP')
 
-data_i <- 3
+data_i <- 1
 eval(parse(text = paste('dat_def <- ', data_names[data_i], sep = '')))
 head(dat_def)
 
@@ -299,34 +330,43 @@ head(dat_def)
 
 dat_merge <- dat_def
 
-mixed.lmer <- lmer(sos ~ Treat + north + spr_temp + STEBO + (1|year), weight = weight, data = dat_merge)  # intercept
+mixed.lmer <- lmer(sos ~ Treat + north + STEBO + (1|year), weight = weight, data = dat_merge)  # intercept
 summary(mixed.lmer)
+mixed.lmer
+summary(mixed.lmer)$coefficients
+
+library(MuMIn)
+r_sq_val <- r.squaredGLMM(mixed.lmer)
+print(r_sq_val)
 
 r.squaredGLMM(mixed.lmer)
-
-
-mixed.lmer <- lm(sos ~ Treat + north + spr_temp * STEBO, weight = weight, data = dat_merge)  # intercept
-summary(mixed.lmer)
-
-mixed.lmer <- lm(eos ~ Treat + north + aut_temp * STEBV, weight = weight, data = dat_merge)  # intercept
-summary(mixed.lmer)
-
-summary(mixed.lmer)[[5]][1,1]
-
-mixed.lmer <- lm(eos ~ Treat + north + aut_temp  + STEBV, weight = weight, data = dat_merge)  # intercept
-summary(mixed.lmer)
-
-
-mixed.lmer <- lmer(eos ~ Treat + north + aut_temp * STEBV  + (1|year), weight = weight, data = dat_merge)  # intercept
-summary(mixed.lmer)
-
-mixed.lmer <- lm(los ~ Treat + north + spr_temp + aut_temp + DWD_LOS, weight = weight, data = dat_merge)  # intercept
-summary(mixed.lmer)
-
-summary(mixed.lmer)[[5]]
-
-mixed.lmer <- lmer(los ~ Treat + north + spr_temp * aut_temp * DWD_LOS  + (1|year), weight = weight, data = dat_merge)  # intercept
-summary(mixed.lmer)
+# 
+# mixed.lmer <- lm(eos ~ Treat + north + spr_temp  , weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
+# 
+# 
+# mixed.lmer <- lm(sos ~ Treat + north + spr_temp * STEBO, weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
+# 
+# mixed.lmer <- lm(eos ~ Treat + north + aut_temp * STEBV, weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
+# 
+# summary(mixed.lmer)[[5]][1,1]
+# 
+# mixed.lmer <- lm(eos ~ Treat + north + aut_temp  + STEBV, weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
+# 
+# 
+# mixed.lmer <- lmer(eos ~ Treat + north + aut_temp * STEBV  + (1|year), weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
+# 
+# mixed.lmer <- lm(los ~ Treat + north + spr_temp + aut_temp + DWD_LOS, weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
+# 
+# summary(mixed.lmer)[[5]]
+# 
+# mixed.lmer <- lmer(los ~ Treat + north + spr_temp * aut_temp * DWD_LOS  + (1|year), weight = weight, data = dat_merge)  # intercept
+# summary(mixed.lmer)
 
 summary(mixed.lmer)$coefficients
 inter <- summary(mixed.lmer)$coefficients[1,1]
@@ -857,11 +897,15 @@ for(data_i in 1:3){
       DWD_p <- pvalue
     }
     
+    r_sq_val <- r.squaredGLMM(mixed.lmer)
+    r_sq_m <- r_sq_val[1,1]
+    r_sq_c <- r_sq_val[1,2]
     
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
-                      aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
+                      aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p,
+                      r_sq_m = r_sq_m, r_sq_c = r_sq_c)
     if (data_i == 1){
       if(i == 1){
         mod_summary <- new
@@ -949,11 +993,15 @@ for(data_i in 1:3){
       DWD_p <- pvalue
     }
     
+    r_sq_val <- r.squaredGLMM(mixed.lmer)
+    r_sq_m <- r_sq_val[1,1]
+    r_sq_c <- r_sq_val[1,2]
     
     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
                       north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
-                      aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p)
+                      aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p,
+                      r_sq_m = r_sq_m, r_sq_c = r_sq_c)
  
     mod_summary <- rbind(mod_summary, new)
     
@@ -1052,7 +1100,7 @@ for(data_i in 1:3){
 
 mod_summary
 
-write.csv(mod_summary, 'mod_sum_ndvi.csv', row.names = FALSE)
+write.csv(mod_summary, 'mod_sum_r_sq.csv', row.names = FALSE)
 
 
 #######################
