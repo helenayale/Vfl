@@ -127,8 +127,17 @@ dat_dwd$key <- paste(dat_dwd$key, '_', dat_dwd$year, sep = '')
 dat_dwd <- merge(dat_dwd, dat_temp, by = 'key')
 head(dat_dwd)
 
+dat_dwd_a <-  read.csv('DWD_Ann.csv')
+dat_dwd_a$key <- paste(dat_dwd_a$ID, '_', dat_dwd_a$Parcel, '_', dat_dwd_a$year, sep = '')
+head(dat_dwd_a)
+
+dat_t_ann <- dat_dwd_a[, c('key', 'AnnTMean', 'AnnPrec', 'AnnDI')]
+dat_dwd <- merge(dat_dwd, dat_t_ann, by = 'key')
+head(dat_dwd)
+
+
 #### add DWD data to each dataset
-dat_dwd_m <- dat_dwd[,c('key', 'STEBO', 'STEBV', 'DWD_LOS', 'spr_temp', 'sum_temp', 'aut_temp', 'win_temp')]
+dat_dwd_m <- dat_dwd[,c('key', 'STEBO', 'STEBV', 'DWD_LOS', 'spr_temp', 'sum_temp', 'aut_temp', 'win_temp', 'AnnTMean', 'AnnPrec', 'AnnDI')]
 head(dat_dwd_m)
 
 dat_pheno_SG$key <- paste(dat_pheno_SG$key, '_', dat_pheno_SG$year, sep = '')
@@ -162,9 +171,9 @@ head(dat_wek)
 ###################################################################
 # record the SD before normalization
 dat_name <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek')
-var_name <- c('spr_temp', 'sum_temp', 'aut_temp', 'win_temp', 'STEBO', 'STEBV', 'DWD_LOS')
+var_name <- c('spr_temp', 'sum_temp', 'aut_temp', 'win_temp', 'STEBO', 'STEBV', 'DWD_LOS', 'AnnTMean', 'AnnPrec', 'AnnDI')
 
-for(dat_i in 1:length(dat_name )){
+for(dat_i in 1:length(dat_name)){
   dat <- dat_name[dat_i]
   for(var_i in 1:length(var_name)){
     var <- var_name[var_i]
@@ -189,29 +198,40 @@ write.csv(dat_sd, 'dat_sd.csv', row.names = FALSE)
 
 ################################################################################
 # normalize Temperature & DWD
-dat_pheno_SG$spr_temp <- scale(dat_pheno_SG$spr_temp, center = TRUE, scale = TRUE)
-dat_pheno_SG$sum_temp <- scale(dat_pheno_SG$sum_temp, center = TRUE, scale = TRUE)
-dat_pheno_SG$aut_temp <- scale(dat_pheno_SG$aut_temp, center = TRUE, scale = TRUE)
-dat_pheno_SG$win_temp <- scale(dat_pheno_SG$win_temp, center = TRUE, scale = TRUE)
-dat_pheno_SG$STEBO <- scale(dat_pheno_SG$STEBO, center = TRUE, scale = TRUE)
-dat_pheno_SG$STEBV <- scale(dat_pheno_SG$STEBV, center = TRUE, scale = TRUE)
-dat_pheno_SG$DWD_LOS <- scale(dat_pheno_SG$DWD_LOS, center = TRUE, scale = TRUE)
 
-dat_pheno_DL$spr_temp <- scale(dat_pheno_DL$spr_temp, center = TRUE, scale = TRUE)
-dat_pheno_DL$sum_temp <- scale(dat_pheno_DL$sum_temp, center = TRUE, scale = TRUE)
-dat_pheno_DL$aut_temp <- scale(dat_pheno_DL$aut_temp, center = TRUE, scale = TRUE)
-dat_pheno_DL$win_temp <- scale(dat_pheno_DL$win_temp, center = TRUE, scale = TRUE)
-dat_pheno_DL$STEBO <- scale(dat_pheno_DL$STEBO, center = TRUE, scale = TRUE)
-dat_pheno_DL$STEBV <- scale(dat_pheno_DL$STEBV, center = TRUE, scale = TRUE)
-dat_pheno_DL$DWD_LOS <- scale(dat_pheno_DL$DWD_LOS, center = TRUE, scale = TRUE)
+dat_name <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_wek')
+var_name <- c('spr_temp', 'sum_temp', 'aut_temp', 'win_temp', 'STEBO', 'STEBV', 'DWD_LOS', 'AnnTMean', 'AnnPrec', 'AnnDI')
 
-dat_wek$spr_temp <- scale(dat_wek$spr_temp, center = TRUE, scale = TRUE)
-dat_wek$sum_temp <- scale(dat_wek$sum_temp, center = TRUE, scale = TRUE)
-dat_wek$aut_temp <- scale(dat_wek$aut_temp, center = TRUE, scale = TRUE)
-dat_wek$win_temp <- scale(dat_wek$win_temp, center = TRUE, scale = TRUE)
-dat_wek$STEBO <- scale(dat_wek$STEBO, center = TRUE, scale = TRUE)
-dat_wek$STEBV <- scale(dat_wek$STEBV, center = TRUE, scale = TRUE)
-dat_wek$DWD_LOS <- scale(dat_wek$DWD_LOS, center = TRUE, scale = TRUE)
+for(dat_i in 1:length(dat_name)){
+  for(var_i in 1:length(var_name)){
+    eval(parse(text = paste(dat_name[dat_i], '$', var_name[var_i], '<- scale(', dat_name[dat_i], '$', var_name[var_i], ', center = TRUE, scale = TRUE)',sep = '')))
+  }
+}
+
+
+# dat_pheno_SG$spr_temp <- scale(dat_pheno_SG$spr_temp, center = TRUE, scale = TRUE)
+# dat_pheno_SG$sum_temp <- scale(dat_pheno_SG$sum_temp, center = TRUE, scale = TRUE)
+# dat_pheno_SG$aut_temp <- scale(dat_pheno_SG$aut_temp, center = TRUE, scale = TRUE)
+# dat_pheno_SG$win_temp <- scale(dat_pheno_SG$win_temp, center = TRUE, scale = TRUE)
+# dat_pheno_SG$STEBO <- scale(dat_pheno_SG$STEBO, center = TRUE, scale = TRUE)
+# dat_pheno_SG$STEBV <- scale(dat_pheno_SG$STEBV, center = TRUE, scale = TRUE)
+# dat_pheno_SG$DWD_LOS <- scale(dat_pheno_SG$DWD_LOS, center = TRUE, scale = TRUE)
+# 
+# dat_pheno_DL$spr_temp <- scale(dat_pheno_DL$spr_temp, center = TRUE, scale = TRUE)
+# dat_pheno_DL$sum_temp <- scale(dat_pheno_DL$sum_temp, center = TRUE, scale = TRUE)
+# dat_pheno_DL$aut_temp <- scale(dat_pheno_DL$aut_temp, center = TRUE, scale = TRUE)
+# dat_pheno_DL$win_temp <- scale(dat_pheno_DL$win_temp, center = TRUE, scale = TRUE)
+# dat_pheno_DL$STEBO <- scale(dat_pheno_DL$STEBO, center = TRUE, scale = TRUE)
+# dat_pheno_DL$STEBV <- scale(dat_pheno_DL$STEBV, center = TRUE, scale = TRUE)
+# dat_pheno_DL$DWD_LOS <- scale(dat_pheno_DL$DWD_LOS, center = TRUE, scale = TRUE)
+# 
+# dat_wek$spr_temp <- scale(dat_wek$spr_temp, center = TRUE, scale = TRUE)
+# dat_wek$sum_temp <- scale(dat_wek$sum_temp, center = TRUE, scale = TRUE)
+# dat_wek$aut_temp <- scale(dat_wek$aut_temp, center = TRUE, scale = TRUE)
+# dat_wek$win_temp <- scale(dat_wek$win_temp, center = TRUE, scale = TRUE)
+# dat_wek$STEBO <- scale(dat_wek$STEBO, center = TRUE, scale = TRUE)
+# dat_wek$STEBV <- scale(dat_wek$STEBV, center = TRUE, scale = TRUE)
+# dat_wek$DWD_LOS <- scale(dat_wek$DWD_LOS, center = TRUE, scale = TRUE)
 
 
 # add weight column
@@ -330,7 +350,7 @@ head(dat_def)
 
 dat_merge <- dat_def
 
-mixed.lmer <- lmer(sos ~ Treat + north + STEBO + (1|year), weight = weight, data = dat_merge)  # intercept
+mixed.lmer <- lmer(sos ~ Treat + north + STEBO + spr_temp + AnnTMean + (1|year), weight = weight, data = dat_merge)  # intercept
 summary(mixed.lmer)
 mixed.lmer
 summary(mixed.lmer)$coefficients
@@ -340,34 +360,18 @@ r_sq_val <- r.squaredGLMM(mixed.lmer)
 print(r_sq_val)
 
 r.squaredGLMM(mixed.lmer)
-# 
-# mixed.lmer <- lm(eos ~ Treat + north + spr_temp  , weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
-# 
-# 
-# mixed.lmer <- lm(sos ~ Treat + north + spr_temp * STEBO, weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
-# 
-# mixed.lmer <- lm(eos ~ Treat + north + aut_temp * STEBV, weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
-# 
-# summary(mixed.lmer)[[5]][1,1]
-# 
-# mixed.lmer <- lm(eos ~ Treat + north + aut_temp  + STEBV, weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
-# 
-# 
-# mixed.lmer <- lmer(eos ~ Treat + north + aut_temp * STEBV  + (1|year), weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
-# 
-# mixed.lmer <- lm(los ~ Treat + north + spr_temp + aut_temp + DWD_LOS, weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
-# 
-# summary(mixed.lmer)[[5]]
-# 
-# mixed.lmer <- lmer(los ~ Treat + north + spr_temp * aut_temp * DWD_LOS  + (1|year), weight = weight, data = dat_merge)  # intercept
-# summary(mixed.lmer)
+ 
+mixed.lmer <- lmer(eos ~ Treat + north  + STEBV + aut_temp + AnnTMean + (1|year), weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
 
+
+mixed.lmer <- lmer(los ~ Treat + north  + DWD_LOS + AnnTMean + (1|year), weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
+
+mixed.lmer <- lm(los ~ Treat + north  + DWD_LOS + AnnTMean, weight = weight, data = dat_merge)  # intercept
+summary(mixed.lmer)
+
+########################################
 summary(mixed.lmer)$coefficients
 inter <- summary(mixed.lmer)$coefficients[1,1]
 p.value <- summary(mixed.lmer)$coefficients[1,5]
@@ -1505,3 +1509,770 @@ mean(dat_dwd$STEBV)
 mean(dat_pheno_SG$max_day)
 mean(dat_pheno_DL$max_day)
 mean(dat_pheno_VPP$max)
+
+
+
+################################################################################
+
+#################################
+####### Loop without temp #######
+#################################
+# 
+# 
+# data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
+# title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
+# abbr_names <- c('SG', 'DL', 'VPP')
+# 
+# for(data_i in 1:3){
+#   eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
+#   
+#   
+#   
+#   #### calculate SD of each index
+#   
+#   key_list <- unique(dat_merge$key)
+#   
+#   for (key_i in 1:length(key_list)){
+#     key_n <- key_list[key_i]
+#     sub_key <- subset(dat_merge, key == key_n)
+#     plot <- unique(sub_key$plot)
+#     par <- unique(sub_key$parcel)
+#     treat <- unique(sub_key$Treat)
+#     age <- unique(sub_key$Age)
+#     yr <- unique(sub_key$year)
+#     north <- unique(sub_key$north)
+#     STEBO <- unique(sub_key$STEBO)
+#     STEBV <- unique(sub_key$STEBV)
+#     DWD_LOS <- unique(sub_key$DWD_LOS)
+#     spr_temp <- unique(sub_key$spr_temp)
+#     sum_temp <- unique(sub_key$sum_temp)
+#     aut_temp <- unique(sub_key$aut_temp)
+#     win_temp <- unique(sub_key$win_temp)
+#     
+#     sub_yr <- subset(sub_key, year == yr)
+#     # count number of non-NA pixels
+#     pix_sos <- sum(!is.na(sub_yr$sos))
+#     pix_eos <- sum(!is.na(sub_yr$eos))
+#     pix_los <- sum(!is.na(sub_yr$los))
+#     
+#     # calculate sd of each index
+#     sd_sos <- sd(sub_yr$sos)
+#     sd_eos <- sd(sub_yr$eos)
+#     sd_los <- sd(sub_yr$los)
+#     sd_sosv <- sd(sub_yr$sosv)
+#     sd_eosv <- sd(sub_yr$eosv)
+#     
+#     # calculate mean of each index
+#     m_sos <- mean(sub_yr$sos)
+#     m_eos <- mean(sub_yr$eos)
+#     m_los <- mean(sub_yr$los)
+#     m_sosv <- mean(sub_yr$sosv)
+#     m_eosv <- mean(sub_yr$eosv)
+#     
+#     # calculate CV (Coefficient of Variation)
+#     cv_sos <- sd_sos/m_sos
+#     cv_eos <- sd_eos/m_eos
+#     cv_los <- sd_los/m_los
+#     
+#     neww <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, Age = age, 
+#                        north = north, STEBO = STEBO, STEBV = STEBV, DWD_LOS = DWD_LOS, 
+#                        spr_temp = spr_temp, sum_temp = sum_temp, aut_temp = aut_temp, 
+#                        pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, win_temp = win_temp,
+#                        m_sos = m_sos, m_eos = m_eos, m_los = m_los, m_sosv = m_sosv, m_eosv = m_eosv,
+#                        sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los, sd_sosv = sd_sosv, sd_eosv = sd_eosv,
+#                        cv_sos = cv_sos, cv_eos = cv_eos, cv_los = cv_los)
+#     
+#     if (key_i == 1){
+#       dat_key <- neww
+#     }else{
+#       dat_key <- rbind(dat_key, neww)
+#     }
+#     
+#   }
+#   
+#   
+#   dat_key$log_sds <- log(dat_key$sd_sos)
+#   dat_key$log_sde <- log(dat_key$sd_eos)
+#   dat_key$log_sdl <- log(dat_key$sd_los)
+#   dat_key$log_sdsv <- dat_key$sd_sosv
+#   dat_key$log_sdev <- dat_key$sd_eosv
+#   
+#   dat_key$log_cvs <- log(dat_key$cv_sos)
+#   dat_key$log_cve <- log(dat_key$cv_eos)
+#   dat_key$log_cvl <- log(dat_key$cv_los)
+#   
+#   dat_test <- dat_key
+#   
+#   
+#   ### model sos, eos, los, sosv, eosv
+#   var_names <- c('sos', 'eos', 'los', 'sosv', 'eosv')
+#   for (i in 1:5){
+#     var <- var_names[i]
+#     
+#     # weight
+#     if (i == 1){
+#       eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + STEBO  + (1|year), weight = weight, data = dat_merge)', sep = '')))
+#     }else if (i == 2){
+#       eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + STEBV  + (1|year), weight = weight, data = dat_merge)', sep = '')))
+#     }else {
+#       eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + DWD_LOS + (1|year), weight = weight, data = dat_merge)', sep = '')))
+#     }
+#     
+#     # # without weight
+#     # if (i == 1){
+#     #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+#     # }else if (i == 2){
+#     #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBV  + (1|year), data = dat_merge)', sep = '')))
+#     # }else {
+#     #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + DWD_LOS   + (1|year), data = dat_merge)', sep = '')))
+#     # }
+#     
+#     
+#     inter <- summary(mixed.lmer)$coefficients[1,1]
+#     p.value <- summary(mixed.lmer)$coefficients[1,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     int_p <- pvalue
+#     
+#     F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+#     p.value <- summary(mixed.lmer)$coefficients[2,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     F_p <- pvalue
+#     
+#     Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+#     p.value <- summary(mixed.lmer)$coefficients[3,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     Z_p <- pvalue
+#     
+#     north <- summary(mixed.lmer)$coefficients[4,1]
+#     p.value <- summary(mixed.lmer)$coefficients[4,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     north_p <- pvalue
+#     
+#     DWD <- summary(mixed.lmer)$coefficients[5,1]
+#     p.value <- summary(mixed.lmer)$coefficients[5,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     DWD_p <- pvalue
+#     
+#     r_sq_val <- r.squaredGLMM(mixed.lmer)
+#     r_sq_m <- r_sq_val[1,1]
+#     r_sq_c <- r_sq_val[1,2]
+#     
+#     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+#                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
+#                       north = north,north_p = north_p, DWD = DWD, DWD_p = DWD_p,
+#                       r_sq_m = r_sq_m, r_sq_c = r_sq_c)
+#     if (data_i == 1){
+#       if(i == 1){
+#         mod_summary <- new
+#       }else{
+#         mod_summary <- rbind(mod_summary, new)
+#       }
+#     }else{
+#       mod_summary <- rbind(mod_summary, new)
+#     }
+#   }
+#   
+#   
+#   # model sds, sde, sdl
+#   var_names <- c('sds', 'sde', 'sdl', 'sdsv', 'sdev')
+#   for (j in 1:5){
+#     var <- var_names[j]
+#     if (j == 1){
+#       eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + STEBO  + (1|year), data = dat_test)', sep = '')))
+#     }else if (j == 2){
+#       eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + STEBV  + (1|year), data = dat_test)', sep = '')))
+#     }else {
+#       eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + DWD_LOS  + (1|year), data = dat_test)', sep = '')))
+#     }
+#     
+#     inter <- summary(mixed.lmer)$coefficients[1,1]
+#     p.value <- summary(mixed.lmer)$coefficients[1,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     int_p <- pvalue
+#     
+#     F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+#     p.value <- summary(mixed.lmer)$coefficients[2,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     F_p <- pvalue
+#     
+#     Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+#     p.value <- summary(mixed.lmer)$coefficients[3,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     Z_p <- pvalue
+#     
+#     north <- summary(mixed.lmer)$coefficients[4,1]
+#     p.value <- summary(mixed.lmer)$coefficients[4,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     north_p <- pvalue
+#     
+#     DWD <- summary(mixed.lmer)$coefficients[5,1]
+#     p.value <- summary(mixed.lmer)$coefficients[5,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     DWD_p <- pvalue
+#     
+#     r_sq_val <- r.squaredGLMM(mixed.lmer)
+#     r_sq_m <- r_sq_val[1,1]
+#     r_sq_c <- r_sq_val[1,2]
+#     
+#     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+#                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
+#                       north = north,north_p = north_p, DWD = DWD, DWD_p = DWD_p,
+#                       r_sq_m = r_sq_m, r_sq_c = r_sq_c)
+#     
+#     mod_summary <- rbind(mod_summary, new)
+#     
+#   }
+#   
+#   
+#   
+# }
+# 
+# 
+# mod_summary
+# 
+# write.csv(mod_summary, 'mod_sum_ohne_temp.csv', row.names = FALSE)
+
+
+################################################################################
+
+#############################
+####### Loop AnnTMean #######
+#############################
+
+
+# data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
+# title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
+# abbr_names <- c('SG', 'DL', 'VPP')
+# 
+# for(data_i in 1:3){
+#   eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
+# 
+#   #### calculate SD of each index
+# 
+#   key_list <- unique(dat_merge$key)
+# 
+#   for (key_i in 1:length(key_list)){
+#     key_n <- key_list[key_i]
+#     sub_key <- subset(dat_merge, key == key_n)
+#     plot <- unique(sub_key$plot)
+#     par <- unique(sub_key$parcel)
+#     treat <- unique(sub_key$Treat)
+#     age <- unique(sub_key$Age)
+#     yr <- unique(sub_key$year)
+#     north <- unique(sub_key$north)
+#     STEBO <- unique(sub_key$STEBO)
+#     STEBV <- unique(sub_key$STEBV)
+#     DWD_LOS <- unique(sub_key$DWD_LOS)
+#     spr_temp <- unique(sub_key$spr_temp)
+#     sum_temp <- unique(sub_key$sum_temp)
+#     aut_temp <- unique(sub_key$aut_temp)
+#     win_temp <- unique(sub_key$win_temp)
+#     AnnTMean <- unique(sub_key$AnnTMean)
+# 
+#     sub_yr <- subset(sub_key, year == yr)
+#     # count number of non-NA pixels
+#     pix_sos <- sum(!is.na(sub_yr$sos))
+#     pix_eos <- sum(!is.na(sub_yr$eos))
+#     pix_los <- sum(!is.na(sub_yr$los))
+# 
+#     # calculate sd of each index
+#     sd_sos <- sd(sub_yr$sos)
+#     sd_eos <- sd(sub_yr$eos)
+#     sd_los <- sd(sub_yr$los)
+#     sd_sosv <- sd(sub_yr$sosv)
+#     sd_eosv <- sd(sub_yr$eosv)
+# 
+#     # calculate mean of each index
+#     m_sos <- mean(sub_yr$sos)
+#     m_eos <- mean(sub_yr$eos)
+#     m_los <- mean(sub_yr$los)
+#     m_sosv <- mean(sub_yr$sosv)
+#     m_eosv <- mean(sub_yr$eosv)
+# 
+#     # calculate CV (Coefficient of Variation)
+#     cv_sos <- sd_sos/m_sos
+#     cv_eos <- sd_eos/m_eos
+#     cv_los <- sd_los/m_los
+# 
+#     neww <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, Age = age,
+#                        north = north, STEBO = STEBO, STEBV = STEBV, DWD_LOS = DWD_LOS,
+#                        spr_temp = spr_temp, sum_temp = sum_temp, aut_temp = aut_temp,
+#                        pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, win_temp = win_temp, AnnTMean = AnnTMean,
+#                        m_sos = m_sos, m_eos = m_eos, m_los = m_los, m_sosv = m_sosv, m_eosv = m_eosv,
+#                        sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los, sd_sosv = sd_sosv, sd_eosv = sd_eosv,
+#                        cv_sos = cv_sos, cv_eos = cv_eos, cv_los = cv_los)
+# 
+#     if (key_i == 1){
+#       dat_key <- neww
+#     }else{
+#       dat_key <- rbind(dat_key, neww)
+#     }
+# 
+#   }
+# 
+# 
+#   dat_key$log_sds <- log(dat_key$sd_sos)
+#   dat_key$log_sde <- log(dat_key$sd_eos)
+#   dat_key$log_sdl <- log(dat_key$sd_los)
+#   dat_key$log_sdsv <- dat_key$sd_sosv
+#   dat_key$log_sdev <- dat_key$sd_eosv
+# 
+#   dat_key$log_cvs <- log(dat_key$cv_sos)
+#   dat_key$log_cve <- log(dat_key$cv_eos)
+#   dat_key$log_cvl <- log(dat_key$cv_los)
+# 
+#   dat_test <- dat_key
+# 
+# 
+#   ### model sos, eos, los, sosv, eosv
+#   var_names <- c('sos', 'eos', 'los', 'sosv', 'eosv')
+#   for (i in 1:5){
+#     var <- var_names[i]
+# 
+#     # weight
+#     if (i == 1){
+#       eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + STEBO + spr_temp + (1|year), weight = weight, data = dat_merge)', sep = '')))
+#     }else if (i == 2){
+#       eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + STEBV + aut_temp + (1|year), weight = weight, data = dat_merge)', sep = '')))
+#     }else {
+#       eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + DWD_LOS + AnnTMean + (1|year), weight = weight, data = dat_merge)', sep = '')))
+#     }
+# 
+#     # # without weight
+#     # if (i == 1){
+#     #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+#     # }else if (i == 2){
+#     #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBV  + (1|year), data = dat_merge)', sep = '')))
+#     # }else {
+#     #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + DWD_LOS   + (1|year), data = dat_merge)', sep = '')))
+#     # }
+# 
+# 
+#     inter <- summary(mixed.lmer)$coefficients[1,1]
+#     p.value <- summary(mixed.lmer)$coefficients[1,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     int_p <- pvalue
+# 
+#     F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+#     p.value <- summary(mixed.lmer)$coefficients[2,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     F_p <- pvalue
+# 
+#     Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+#     p.value <- summary(mixed.lmer)$coefficients[3,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     Z_p <- pvalue
+# 
+#     north <- summary(mixed.lmer)$coefficients[4,1]
+#     p.value <- summary(mixed.lmer)$coefficients[4,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     north_p <- pvalue
+# 
+#     DWD <- summary(mixed.lmer)$coefficients[5,1]
+#     p.value <- summary(mixed.lmer)$coefficients[5,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     DWD_p <- pvalue
+#     
+#     temp <- summary(mixed.lmer)$coefficients[6,1]
+#     p.value <- summary(mixed.lmer)$coefficients[6,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     temp_p <- pvalue
+# 
+#     r_sq_val <- r.squaredGLMM(mixed.lmer)
+#     r_sq_m <- r_sq_val[1,1]
+#     r_sq_c <- r_sq_val[1,2]
+# 
+#     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+#                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
+#                       north = north, north_p = north_p, DWD = DWD, DWD_p = DWD_p, temp = temp, temp_p = temp_p,
+#                       r_sq_m = r_sq_m, r_sq_c = r_sq_c)
+#     if (data_i == 1){
+#       if(i == 1){
+#         mod_summary <- new
+#       }else{
+#         mod_summary <- rbind(mod_summary, new)
+#       }
+#     }else{
+#       mod_summary <- rbind(mod_summary, new)
+#     }
+#   }
+# 
+# 
+#   # model sds, sde, sdl
+#   var_names <- c('sds', 'sde', 'sdl', 'sdsv', 'sdev')
+#   for (j in 1:5){
+#     var <- var_names[j]
+#     if (j == 1){
+#       eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + STEBO + spr_temp + (1|year), data = dat_test)', sep = '')))
+#     }else if (j == 2){
+#       eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + STEBV + aut_temp + (1|year), data = dat_test)', sep = '')))
+#     }else {
+#       eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + DWD_LOS + AnnTMean + (1|year), data = dat_test)', sep = '')))
+#     }
+# 
+#     inter <- summary(mixed.lmer)$coefficients[1,1]
+#     p.value <- summary(mixed.lmer)$coefficients[1,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     int_p <- pvalue
+# 
+#     F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+#     p.value <- summary(mixed.lmer)$coefficients[2,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     F_p <- pvalue
+# 
+#     Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+#     p.value <- summary(mixed.lmer)$coefficients[3,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     Z_p <- pvalue
+# 
+#     north <- summary(mixed.lmer)$coefficients[4,1]
+#     p.value <- summary(mixed.lmer)$coefficients[4,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     north_p <- pvalue
+# 
+#     DWD <- summary(mixed.lmer)$coefficients[5,1]
+#     p.value <- summary(mixed.lmer)$coefficients[5,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     DWD_p <- pvalue
+#     
+#     temp <- summary(mixed.lmer)$coefficients[6,1]
+#     p.value <- summary(mixed.lmer)$coefficients[6,5]
+#     if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+#     temp_p <- pvalue
+# 
+#     r_sq_val <- r.squaredGLMM(mixed.lmer)
+#     r_sq_m <- r_sq_val[1,1]
+#     r_sq_c <- r_sq_val[1,2]
+# 
+#     new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+#                       M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
+#                       north = north,north_p = north_p, DWD = DWD, DWD_p = DWD_p, temp = temp, temp_p = temp_p,
+#                       r_sq_m = r_sq_m, r_sq_c = r_sq_c)
+# 
+#     mod_summary <- rbind(mod_summary, new)
+# 
+#   }
+# 
+# 
+# 
+# }
+# 
+# 
+# mod_summary
+# 
+# write.csv(mod_summary, 'mod_sum_AnnT.csv', row.names = FALSE)
+
+
+
+################################################################################
+
+###############################
+####### Loop ++AnnTMean #######
+###############################
+
+
+data_names <- c('dat_pheno_SG', 'dat_pheno_DL', 'dat_pheno_VPP')
+title_names <- c('Savitzy-Golay', 'DLogistic', 'WekEO-VPP')
+abbr_names <- c('SG', 'DL', 'VPP')
+
+for(data_i in 1:3){
+  eval(parse(text = paste('dat_merge <- ', data_names[data_i], sep = '')))
+  
+  #### calculate SD of each index
+  
+  key_list <- unique(dat_merge$key)
+  
+  for (key_i in 1:length(key_list)){
+    key_n <- key_list[key_i]
+    sub_key <- subset(dat_merge, key == key_n)
+    plot <- unique(sub_key$plot)
+    par <- unique(sub_key$parcel)
+    treat <- unique(sub_key$Treat)
+    age <- unique(sub_key$Age)
+    yr <- unique(sub_key$year)
+    north <- unique(sub_key$north)
+    STEBO <- unique(sub_key$STEBO)
+    STEBV <- unique(sub_key$STEBV)
+    DWD_LOS <- unique(sub_key$DWD_LOS)
+    spr_temp <- unique(sub_key$spr_temp)
+    sum_temp <- unique(sub_key$sum_temp)
+    aut_temp <- unique(sub_key$aut_temp)
+    win_temp <- unique(sub_key$win_temp)
+    AnnTMean <- unique(sub_key$AnnTMean)
+    
+    sub_yr <- subset(sub_key, year == yr)
+    # count number of non-NA pixels
+    pix_sos <- sum(!is.na(sub_yr$sos))
+    pix_eos <- sum(!is.na(sub_yr$eos))
+    pix_los <- sum(!is.na(sub_yr$los))
+    
+    # calculate sd of each index
+    sd_sos <- sd(sub_yr$sos)
+    sd_eos <- sd(sub_yr$eos)
+    sd_los <- sd(sub_yr$los)
+    sd_sosv <- sd(sub_yr$sosv)
+    sd_eosv <- sd(sub_yr$eosv)
+    
+    # calculate mean of each index
+    m_sos <- mean(sub_yr$sos)
+    m_eos <- mean(sub_yr$eos)
+    m_los <- mean(sub_yr$los)
+    m_sosv <- mean(sub_yr$sosv)
+    m_eosv <- mean(sub_yr$eosv)
+    
+    # calculate CV (Coefficient of Variation)
+    cv_sos <- sd_sos/m_sos
+    cv_eos <- sd_eos/m_eos
+    cv_los <- sd_los/m_los
+    
+    neww <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, Age = age,
+                       north = north, STEBO = STEBO, STEBV = STEBV, DWD_LOS = DWD_LOS,
+                       spr_temp = spr_temp, sum_temp = sum_temp, aut_temp = aut_temp,
+                       pix_sos = pix_sos, pix_eos = pix_eos, pix_los = pix_los, win_temp = win_temp, AnnTMean = AnnTMean,
+                       m_sos = m_sos, m_eos = m_eos, m_los = m_los, m_sosv = m_sosv, m_eosv = m_eosv,
+                       sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los, sd_sosv = sd_sosv, sd_eosv = sd_eosv,
+                       cv_sos = cv_sos, cv_eos = cv_eos, cv_los = cv_los)
+    
+    if (key_i == 1){
+      dat_key <- neww
+    }else{
+      dat_key <- rbind(dat_key, neww)
+    }
+    
+  }
+  
+  
+  dat_key$log_sds <- log(dat_key$sd_sos)
+  dat_key$log_sde <- log(dat_key$sd_eos)
+  dat_key$log_sdl <- log(dat_key$sd_los)
+  dat_key$log_sdsv <- dat_key$sd_sosv
+  dat_key$log_sdev <- dat_key$sd_eosv
+  
+  dat_key$log_cvs <- log(dat_key$cv_sos)
+  dat_key$log_cve <- log(dat_key$cv_eos)
+  dat_key$log_cvl <- log(dat_key$cv_los)
+  
+  dat_test <- dat_key
+  
+  
+  
+  ### model sos, eos, los, sosv, eosv
+  var_names <- c('sos', 'eos', 'los', 'sosv', 'eosv')
+  for (i in 1:5){
+    var <- var_names[i]
+    
+    # weight
+    if (i == 1){
+      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north  + STEBO + spr_temp + AnnTMean + (1|year), weight = weight, data = dat_merge)', sep = '')))
+    }else if (i == 2){
+      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north  + STEBV + aut_temp + AnnTMean + (1|year), weight = weight, data = dat_merge)', sep = '')))
+    }else {
+      eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + DWD_LOS + spr_temp + aut_temp + AnnTMean + (1|year), weight = weight, data = dat_merge)', sep = '')))
+    }
+    
+    # # without weight
+    # if (i == 1){
+    #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + STEBO  + (1|year), data = dat_merge)', sep = '')))
+    # }else if (i == 2){
+    #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + aut_temp + STEBV  + (1|year), data = dat_merge)', sep = '')))
+    # }else {
+    #   eval(parse(text = paste('mixed.lmer <- lmer(', var, ' ~ Treat + north + spr_temp + aut_temp + DWD_LOS   + (1|year), data = dat_merge)', sep = '')))
+    # }
+    
+    
+    inter <- summary(mixed.lmer)$coefficients[1,1]
+    p.value <- summary(mixed.lmer)$coefficients[1,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    int_p <- pvalue
+    
+    F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+    p.value <- summary(mixed.lmer)$coefficients[2,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    F_p <- pvalue
+    
+    Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+    p.value <- summary(mixed.lmer)$coefficients[3,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    Z_p <- pvalue
+    
+    north <- summary(mixed.lmer)$coefficients[4,1]
+    p.value <- summary(mixed.lmer)$coefficients[4,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    north_p <- pvalue
+    
+    DWD <- summary(mixed.lmer)$coefficients[5,1]
+    p.value <- summary(mixed.lmer)$coefficients[5,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    DWD_p <- pvalue
+    
+    if(i == 1){
+      spr_temp <- summary(mixed.lmer)$coefficients[6,1]
+      p.value <- summary(mixed.lmer)$coefficients[6,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      spr_p <- pvalue
+      
+      aut_temp <- NA
+      aut_p <- NA
+      
+      Ann_temp <- summary(mixed.lmer)$coefficients[7,1]
+      p.value <- summary(mixed.lmer)$coefficients[7,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Ann_p <- pvalue
+      
+    }else if (i == 2){
+      spr_temp <- NA
+      spr_p <- NA
+      
+      aut_temp <- summary(mixed.lmer)$coefficients[6,1]
+      p.value <- summary(mixed.lmer)$coefficients[6,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      aut_p <- pvalue
+      
+      Ann_temp <- summary(mixed.lmer)$coefficients[7,1]
+      p.value <- summary(mixed.lmer)$coefficients[7,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Ann_p <- pvalue
+      
+    }else{
+      spr_temp <- summary(mixed.lmer)$coefficients[6,1]
+      p.value <- summary(mixed.lmer)$coefficients[6,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      spr_p <- pvalue
+      
+      aut_temp <- summary(mixed.lmer)$coefficients[7,1]
+      p.value <- summary(mixed.lmer)$coefficients[7,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      aut_p <- pvalue
+      
+      Ann_temp <- summary(mixed.lmer)$coefficients[8,1]
+      p.value <- summary(mixed.lmer)$coefficients[8,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Ann_p <- pvalue
+    }
+    
+    r_sq_val <- r.squaredGLMM(mixed.lmer)
+    r_sq_m <- r_sq_val[1,1]
+    r_sq_c <- r_sq_val[1,2]
+    
+    new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+                      M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
+                      north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
+                      aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p, Ann_temp = Ann_temp, Ann_p = Ann_p,
+                      r_sq_m = r_sq_m, r_sq_c = r_sq_c)
+    if (data_i == 1){
+      if(i == 1){
+        mod_summary <- new
+      }else{
+        mod_summary <- rbind(mod_summary, new)
+      }
+    }else{
+      mod_summary <- rbind(mod_summary, new)
+    }
+  }
+  
+  
+  # model sds, sde, sdl
+  var_names <- c('sds', 'sde', 'sdl', 'sdsv', 'sdev')
+  for (j in 1:5){
+    var <- var_names[j]
+    if (j == 1){
+      eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north  + STEBO + spr_temp + AnnTMean + (1|year), data = dat_test)', sep = '')))
+    }else if (j == 2){
+      eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north  + STEBV + aut_temp + AnnTMean + (1|year), data = dat_test)', sep = '')))
+    }else {
+      eval(parse(text = paste('mixed.lmer <- lmer(log_', var, ' ~ Treat + north + DWD_LOS + spr_temp + aut_temp + AnnTMean + (1|year), data = dat_test)', sep = '')))
+    }
+    
+    inter <- summary(mixed.lmer)$coefficients[1,1]
+    p.value <- summary(mixed.lmer)$coefficients[1,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    int_p <- pvalue
+    
+    F_Grad <- summary(mixed.lmer)$coefficients[2,1]
+    p.value <- summary(mixed.lmer)$coefficients[2,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    F_p <- pvalue
+    
+    Z_Baum <- summary(mixed.lmer)$coefficients[3,1]
+    p.value <- summary(mixed.lmer)$coefficients[3,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    Z_p <- pvalue
+    
+    north <- summary(mixed.lmer)$coefficients[4,1]
+    p.value <- summary(mixed.lmer)$coefficients[4,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    north_p <- pvalue
+    
+    DWD <- summary(mixed.lmer)$coefficients[5,1]
+    p.value <- summary(mixed.lmer)$coefficients[5,5]
+    if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+    DWD_p <- pvalue
+    
+    if(j == 1){
+      spr_temp <- summary(mixed.lmer)$coefficients[6,1]
+      p.value <- summary(mixed.lmer)$coefficients[6,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      spr_p <- pvalue
+      
+      aut_temp <- NA
+      aut_p <- NA
+      
+      Ann_temp <- summary(mixed.lmer)$coefficients[7,1]
+      p.value <- summary(mixed.lmer)$coefficients[7,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Ann_p <- pvalue
+      
+    }else if (j == 2){
+      spr_temp <- NA
+      spr_p <- NA
+      
+      aut_temp <- summary(mixed.lmer)$coefficients[6,1]
+      p.value <- summary(mixed.lmer)$coefficients[6,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      aut_p <- pvalue
+      
+      Ann_temp <- summary(mixed.lmer)$coefficients[7,1]
+      p.value <- summary(mixed.lmer)$coefficients[7,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Ann_p <- pvalue
+      
+    }else{
+      spr_temp <- summary(mixed.lmer)$coefficients[6,1]
+      p.value <- summary(mixed.lmer)$coefficients[6,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      spr_p <- pvalue
+      
+      aut_temp <- summary(mixed.lmer)$coefficients[7,1]
+      p.value <- summary(mixed.lmer)$coefficients[7,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      aut_p <- pvalue
+      
+      Ann_temp <- summary(mixed.lmer)$coefficients[8,1]
+      p.value <- summary(mixed.lmer)$coefficients[8,5]
+      if (p.value <0.001) {pvalue <- "***"} else if (p.value <0.05) {pvalue <- "**"} else if (p.value <0.01) {pvalue <- "*"}else(pvalue <- "ns")
+      Ann_p <- pvalue
+    }
+    
+    r_sq_val <- r.squaredGLMM(mixed.lmer)
+    r_sq_m <- r_sq_val[1,1]
+    r_sq_c <- r_sq_val[1,2]
+    
+    new <- data.frame(Y = var, data =  abbr_names[data_i], intercept = inter, int_p = int_p,
+                      M = F_Grad, M_p = F_p, H = Z_Baum, H_p = Z_p,
+                      north = north,north_p = north_p, spr_temp = spr_temp, spr_p = spr_p,
+                      aut_temp = aut_temp, aut_p = aut_p, DWD = DWD, DWD_p = DWD_p, Ann_temp = Ann_temp, Ann_p = Ann_p,
+                      r_sq_m = r_sq_m, r_sq_c = r_sq_c)
+    
+    mod_summary <- rbind(mod_summary, new)
+    
+    
+  }
+  
+  
+  
+}
+
+
+mod_summary
+
+write.csv(mod_summary, 'mod_sum_plus_AnnT.csv', row.names = FALSE)
