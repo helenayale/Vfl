@@ -1,0 +1,860 @@
+---
+title: "Pheno_plot"
+author: "Haiyin Ye"
+format: html
+editor: visual
+---
+
+## Preparation
+
+library & load data
+
+```{r}
+library(ggplot2)
+setwd('D:/GIS_Data/Vfl-oak/WekEO/')
+load('dat_wek_2024.rda')
+# dat_wek[dat_wek$year == 2024, ]
+```
+
+add Treat by meta data
+
+```{r}
+#setwd('D:/GIS_Data/Vfl-oak/WekEO/')
+dat_meta <- read.csv('meta_data2.csv')
+
+dat_all$key <- paste(dat_all$ID, '_', dat_all$Parcel, sep = '')
+
+dat_all$los <- dat_all$eos - dat_all$sos
+
+dat_wek <- merge(dat_all, dat_meta, by = 'key')
+
+Treat_v <- dat_wek$Treat
+Treat_v[Treat_v== "A-Grad"] <- 'Low'
+Treat_v[Treat_v == "F-Grad" ] <- 'Medium'
+Treat_v[Treat_v == "Z-Baum" ] <- 'High'
+
+
+dat_wek$Treat_lvl <- factor(Treat_v, levels = c('Low', 'Medium', 'High'))
+dat_wek
+```
+
+## Boxplot Pheno Dates
+
+```{r}
+sha.test <- shapiro.test(dat_wek[dat_wek$ID %in% c('Gei'),]$sos)
+if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
+norm
+sha.test$p.value
+```
+
+plot SOS
+
+```{r}
+
+plt <- ggplot(
+  data = dat_wek[dat_wek$ID %in% c('Gei', 'Roh90', 'Roh620'),]
+) +
+  geom_boxplot(
+    aes(x = year, y = sos, group = interaction(year, ID, Treat_lvl), color = Treat_lvl)
+  ) +
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2022.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2023.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  scale_x_continuous(
+    breaks = c(2017:2024)
+  ) +
+  scale_color_manual(
+    values = c("#00BFC4", "#E7B800", "#F8786D")
+    ) +
+  labs(
+    title = "Interannual Comparison SOS",
+    y = "DOY", x = "Year"
+  ) +
+  theme_minimal(
+    base_size = 15
+  ) +
+  facet_wrap(
+    ~ID
+  ) +
+  # theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  theme(panel.grid = element_blank())
+plt
+```
+
+plot EOS
+
+```{r}
+
+plt <- ggplot(
+  data = dat_wek[dat_wek$eos > 200,]
+) +
+  geom_boxplot(
+    aes(x = year, y = eos, group = interaction(year, ID, Treat_lvl), color = Treat_lvl)
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2022.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2023.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  scale_x_continuous(
+    breaks = c(2017:2024)
+  ) +
+    scale_color_manual(
+    values = c("#00BFC4", "#E7B800", "#F8786D")
+    ) +
+  labs(
+    title = "Interannual Comparison EOS",
+    y = "DOY", x = "Year"
+  ) +
+  theme_minimal(
+    base_size = 15
+  ) +
+  facet_wrap(
+    ~ID
+  ) +
+  theme(panel.grid = element_blank())
+plt
+```
+
+plot LOS
+
+```{r}
+
+plt <- ggplot(
+  data = dat_wek[dat_wek$ID %in% c('Gei', 'Roh90', 'Roh620'),]
+) +
+  geom_boxplot(
+    aes(x = year, y = los, group = interaction(year, ID, Treat_lvl), color = Treat_lvl)
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2022.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2023.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  scale_x_continuous(
+    breaks = c(2017:2024)
+  ) +
+  scale_color_manual(
+    values = c("#00BFC4", "#E7B800", "#F8786D")
+    ) +
+  labs(
+    title = "Interannual Comparison LOS",
+    y = "DOY", x = "Year"
+  ) +
+  theme_minimal(
+    base_size = 15
+  ) +
+  facet_wrap(
+    ~ID
+  ) +
+  theme(panel.grid = element_blank())
+plt
+```
+
+plot all annual
+
+```{r}
+
+plt <- ggplot(
+  data = dat_wek
+) +
+  geom_boxplot(
+    aes(x = year, y = sos, group = interaction(year, Treat_lvl), color = Treat_lvl)
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2022.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2023.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  scale_x_continuous(
+    breaks = c(2017:2024)
+  ) +
+  scale_color_manual(
+    values = c("#00BFC4", "#E7B800", "#F8786D")
+    ) +
+  labs(
+    title = "Interannual Comparison SOS",
+    y = "DOY", x = "Year"
+  ) +
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank())
+plt
+```
+
+plot all sos
+
+```{r}
+library(ggpubr)
+my_comparisons <- list( c("Low", "Medium"), c("Medium", "High"), c("Low", "High") )
+plt <- 
+  ggboxplot(dat_wek, x = "Treat_lvl", y = "sos", 
+            color = "Treat_lvl", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+            #add = "jitter",
+            ylab = "DOY", 
+            xlab = "Treatment", 
+            main = 'Boxplot SOS')+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(145, 145, 150), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 160, size = 5) +    # Add global anova p-value
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank(),
+        axis.line = element_line(color = "black", size = 0.5),
+        axis.ticks = element_line(color = "black", size = 0.5),
+        axis.ticks.length = unit(0.2, "cm"))
+plt
+```
+
+plot all eos
+
+```{r}
+library(ggpubr)
+my_comparisons <- list( c("Low", "Medium"), c("Medium", "High"), c("Low", "High") )
+plt <- 
+  ggboxplot(dat_wek[dat_wek$eos > 200,],
+            x = "Treat_lvl", y = "eos", 
+            color = "Treat_lvl", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+            #add = "jitter",
+            ylab = "DOY", 
+            xlab = "Treatment", 
+            main = 'Boxplot EOS')+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(370, 370, 390), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 430, size = 5) +    # Add global anova p-value
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank(),
+        axis.line = element_line(color = "black", size = 0.5),
+        axis.ticks = element_line(color = "black", size = 0.5),
+        axis.ticks.length = unit(0.2, "cm"))
+plt
+```
+
+## Heterogeneity - SD Pheno Metrics
+
+calculate heterogeneity
+
+```{r}
+
+key_list <- unique(dat_wek$key)
+
+for (key_i in 1:length(key_list)){
+  key_n <- key_list[key_i]
+  sub_key <- subset(dat_wek, key == key_n)
+  plot <- unique(sub_key$ID)
+  par <- unique(sub_key$Parcel)
+  treat <- unique(sub_key$Treat_lvl)
+  for (yr in 2017:2024){
+    sub_yr <- subset(sub_key, year == yr)
+    
+    # count number of non-NA pixels
+    pix_sos <- sum(!is.na(sub_yr$sos))
+    pix_eos <- sum(!is.na(sub_yr$eos))
+    pix_los <- sum(!is.na(sub_yr$los))
+ 
+    
+    # calculate sd of each index
+    sd_sos <- sd(sub_yr$sos)
+    sd_eos <- sd(sub_yr$eos)
+    sd_los <- sd(sub_yr$los)
+    
+    # calculate mean of each index
+    m_sos <- mean(sub_yr$sos)
+    m_eos <- mean(sub_yr$eos)
+    m_los <- mean(sub_yr$los)
+
+
+    new <- data.frame(key = key_n, plot = plot, parcel = par, year = yr, Treat = treat, 
+                      n_sos = pix_sos, n_eos = pix_eos, n_los = pix_los,
+                      sd_sos = sd_sos, sd_eos = sd_eos, sd_los = sd_los,
+                      m_sos = m_sos, m_eos = m_eos, m_los = m_los)
+    if (yr == 2017){
+      dat_yr <- new
+    }else{
+      dat_yr <- rbind(dat_yr, new)
+    }
+  }
+  if (key_i == 1){
+    dat_key <- dat_yr
+  }else{
+    dat_key <- rbind(dat_key, dat_yr)
+  }
+
+}
+
+dat_key$cv_sos <- dat_key$sd_sos/dat_key$m_sos
+dat_key$cv_eos <- dat_key$sd_eos/dat_key$m_eos
+dat_key$cv_los <- dat_key$sd_los/dat_key$m_los
+dat_key
+#summary(dat_key)
+#save(dat_key, file = 'dat_sd_2024.rda')
+#load('dat_sd_2024.rda')
+```
+
+plot all annual
+
+```{r}
+
+plt <- ggplot(
+  data = dat_key
+) +
+  geom_boxplot(
+    aes(x = year, y = sd_sos, group = interaction(year, Treat), color = Treat)
+  )+
+  geom_vline(
+    aes(xintercept = 2017.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2018.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2019.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2020.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2021.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2022.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  geom_vline(
+    aes(xintercept = 2023.45),
+    color = "grey",
+    linetype = "dotted",
+    linewidth = .8
+  ) +
+  scale_x_continuous(
+    breaks = c(2017:2024)
+  ) +
+  labs(
+    title = "Interannual Comparison SD SOS",
+    y = "SD", x = "Year"
+  ) +
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank())
+plt
+```
+
+stat test
+
+```{r}
+sha.test <- shapiro.test(dat_key$sd_sos)
+if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
+norm
+sha.test$p.value
+```
+
+log trans
+
+```{r}
+#
+dat_key$log_sds <- log(dat_key$sd_sos)
+dat_key$log_sde <- log(dat_key$sd_eos)
+dat_key$log_sdl <- log(dat_key$sd_los)
+
+dat_key$log_cvs <- log(dat_key$cv_sos)
+dat_key$log_cve <- log(dat_key$cv_eos)
+dat_key$log_cvl <- log(dat_key$cv_los)
+```
+
+stat test log
+
+```{r}
+sha.test <- shapiro.test(dat_key$log_cvs)
+if (sha.test$p.value > 0.05) {norm <- "normal distribution"} else{norm <- "non-normal distribution"}
+norm
+sha.test$p.value
+```
+
+density plot
+
+```{r}
+library(ggpubr)
+ggdensity(dat_key$log_sds, 
+          main = 'Density of LOG SD SOS',
+          xlab = "DOY") +
+  theme_classic(base_size = 20)
+
+```
+
+plot all
+
+```{r}
+library(ggpubr)
+my_comparisons <- list( c("Low", "Medium"), c("Medium", "High"), c("Low", "High") )
+plt <- 
+  ggboxplot(dat_key, x = "Treat", y = "sd_sos", 
+            color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+            add = "jitter",
+            ylab = "SD of SOS", 
+            xlab = "Treatment", 
+            main = paste('Boxplot SD of SOS', sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(7.5, 7.5, 8), size = 5, method = "wilcox.test", exact = FALSE)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 9, size = 5) +    # Add global anova p-value
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank(),
+        axis.line = element_line(color = "black", size = 0.5),
+        axis.ticks = element_line(color = "black", size = 0.5),
+        axis.ticks.length = unit(0.2, "cm"))
+plt
+```
+
+plot: Gei, Roh520, Roh90
+
+```{r}
+library(ggpubr)
+my_comparisons <- list( c("Low", "Medium"), c("Medium", "High"), c("Low", "High") )
+plt <- 
+  ggboxplot(dat_key[dat_key$plot %in% c('Gei', 'Roh90', 'Roh620'),], x = "Treat", y = "log_sds", 
+            color = "Treat",
+            add = "jitter",
+            ylab = "LOG SD of SOS", 
+            xlab = "Treatment", 
+            main = paste('Boxplot LOG SD of SOS', sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(3.5, 3.5, 4), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 5, size = 5) +    # Add global anova p-value
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank())
+plt
+```
+
+plot all EOS
+
+```{r}
+library(ggpubr)
+my_comparisons <- list( c("Low", "Medium"), c("Medium", "High"), c("Low", "High") )
+plt <- 
+  ggboxplot(dat_key, x = "Treat", y = "sd_eos", 
+            color = "Treat", palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+            add = "jitter",
+            ylab = "SD of EOS", 
+            xlab = "Treatment", 
+            main = paste('Boxplot SD of EOS', sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(20.5, 20.5, 22, size = 5) )+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 25, size = 5) +
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank(),
+        axis.line = element_line(color = "black", size = 0.5),
+        axis.ticks = element_line(color = "black", size = 0.5),
+        axis.ticks.length = unit(0.2, "cm"))
+plt
+```
+
+plot EOS: Gei, Roh520, Roh90
+
+```{r}
+library(ggpubr)
+my_comparisons <- list( c("Low", "Medium"), c("Medium", "High"), c("Low", "High") )
+plt <- 
+  ggboxplot(dat_key[dat_key$plot %in% c('Gei', 'Roh90', 'Roh620'),], x = "Treat", y = "log_sde", 
+            color = "Treat",
+            add = "jitter",
+            ylab = "LOG SD of EOS", 
+            xlab = "Treatment", 
+            main = paste('Boxplot LOG SD of EOS', sep = ' '))+ 
+  stat_compare_means(comparisons = my_comparisons, label = "p.signif", label.y = c(3.5, 3.5, 4), size = 5)+ # Add pairwise comparisons p-value
+  stat_compare_means(method = "anova", label.y = 5, size = 5) +    # Add global anova p-value
+  theme_minimal(
+    base_size = 15
+  ) +
+  theme(panel.grid = element_blank())
+plt
+
+```
+
+## Model Prep
+
+load DWD data
+
+```{r}
+load('dat_dwd_2024.rda')
+dat_dwd$key <- paste(dat_dwd$ID, '_', dat_dwd$Parcel, sep = '')
+dat_dwd
+```
+
+```{r}
+dat_dwd <- dat_dwd[, c('key', 'year', 'spr_temp', 'sum_temp', 'aut_temp', 'win_chill', 'spr_prec', 'aut_prec', 'spr_sund', 'aut_sund', 'stebo', 'stebv')]
+dat_dwd
+```
+
+```{r}
+dat_dwd$key_yr <- paste(dat_dwd$key, '_', dat_dwd$year, sep = '')
+dat_wek$key_yr <- paste(dat_wek$key, '_', dat_wek$year, sep = '')
+dat_key$key_yr <- paste(dat_key$key, '_', dat_key$year, sep = '')
+
+dat_dwd_add <- dat_dwd[, c('key_yr', 'spr_temp', 'sum_temp', 'aut_temp', 'win_chill', 'spr_prec', 'aut_prec', 'spr_sund', 'aut_sund', 'stebo', 'stebv')]
+dat_dwd_add
+```
+
+```{r}
+dat_wek <- merge(dat_wek, dat_dwd_add, by = 'key_yr')
+dat_wek
+```
+
+```{r}
+dat_key <- merge(dat_key, dat_dwd_add, by = 'key_yr')
+dat_key
+```
+
+Test correlation
+
+```{r}
+cor.test(dat_wek$spr_temp, dat_wek$stebo, method = "pearson")
+```
+
+## Model Pheno Dates
+
+prepare data sos
+
+```{r}
+dat_sos <- dat_wek[, c('sos', 'ID', 'year', 'Treat_lvl', 'spr_temp', 'win_chill', 'spr_prec', 'spr_sund', 'stebo')]
+colnames(dat_sos) <- c('sos', 'plot', 'year', 'treat', 'spr_temp', 'win_chill', 'spr_prec', 'spr_sund', 'stebo')
+tr <- dat_sos$plot
+tr[tr == 'Gei'] <- 'Pure'
+tr[tr == 'Loh'] <- 'Mix'
+tr[tr == 'Roh620'] <- 'Mix'
+tr[tr == 'Roh635'] <- 'Mix'
+tr[tr == 'Roh90'] <- 'Mix'
+
+dat_sos$comp <- factor(tr, levels = c('Pure', 'Mix'))
+dat_sos
+```
+
+linear mixed-effect model
+
+```{r}
+library(lme4)
+library(lmerTest)
+
+mixed.lmer <- lmer(sos ~ treat + spr_temp + spr_prec + spr_sund + win_chill + (1|year), data = dat_sos[dat_sos$plot %in% c('Gei'),])
+summary(mixed.lmer)
+```
+
+```{r}
+library(MuMIn)
+r_sq_val <- r.squaredGLMM(mixed.lmer)
+print(r_sq_val)
+
+r.squaredGLMM(mixed.lmer)
+```
+
+compare models
+
+```{r}
+model_1 <- lmer(sos ~ treat + comp + spr_temp + stebo + (1|year), data = dat_sos)
+model_2 <- lmer(sos ~ treat + comp + spr_temp + (1|year), data = dat_sos)
+model_3 <- lmer(sos ~ treat + comp + spr_temp + spr_prec + spr_sund + win_chill + (1|year), data = dat_sos)
+model_4 <- lmer(sos ~ treat + spr_temp + spr_prec + spr_sund + win_chill + (1|year) + (1|plot), data = dat_sos)
+model_5 <- lmer(sos ~ treat + spr_temp + spr_prec + spr_sund + win_chill + stebo + (1|year) + (1|plot), data = dat_sos)
+model_6 <- lmer(sos ~ treat + spr_temp + spr_prec + spr_sund + win_chill + (1|year) + (1|plot), data = dat_sos)
+AIC(model_1, model_2, model_3, model_4, model_5, model_6)
+```
+
+random forest
+
+```{r}
+library(randomForest)
+forest <- randomForest(sos ~ ., data = dat_sos, ntree = 200, mtry = 6, localImp = TRUE)
+rf_model <- forest
+RMSE <- min(sqrt(rf_model$mse))
+RMSE
+max(rf_model$rsq)
+```
+
+prepare data eos
+
+```{r}
+dat_eos <- dat_wek[, c('eos', 'ID', 'year', 'Treat_lvl', 'aut_temp', 'aut_prec', 'aut_sund', 'stebv')]
+colnames(dat_eos) <- c('eos', 'plot', 'year', 'treat', 'aut_temp', 'aut_prec', 'aut_sund', 'stebv')
+tr <- dat_eos$plot
+tr[tr == 'Gei'] <- 'Pure'
+tr[tr == 'Loh'] <- 'Mix'
+tr[tr == 'Roh620'] <- 'Mix'
+tr[tr == 'Roh635'] <- 'Mix'
+tr[tr == 'Roh90'] <- 'Mix'
+
+dat_eos$comp <- factor(tr, levels = c('Pure', 'Mix'))
+dat_eos
+```
+
+linear mixed-effect model
+
+```{r}
+library(lme4)
+library(lmerTest)
+
+mixed.lmer <- lmer(eos ~ treat + aut_temp + aut_prec + aut_sund + (1|year), data = dat_eos[dat_eos$plot %in% c('Gei'),])  # intercept
+summary(mixed.lmer)
+```
+
+```{r}
+library(MuMIn)
+r_sq_val <- r.squaredGLMM(mixed.lmer)
+print(r_sq_val)
+
+r.squaredGLMM(mixed.lmer)
+```
+
+## Model Pheno Heterogeneity
+
+prepare data sd sos
+
+```{r}
+dat_sds <- dat_key[, c('log_sds', 'plot', 'year', 'Treat', 'spr_temp', 'win_chill', 'spr_prec', 'spr_sund')]
+colnames(dat_sds) <- c('sds', 'plot', 'year', 'treat', 'spr_temp', 'win_chill', 'spr_prec', 'spr_sund')
+dat_sds
+```
+
+linear mixed-effect model
+
+```{r}
+#library(lme4)
+#library(lmerTest)
+
+mixed.lmer <- lmer(sds ~ treat + spr_temp + spr_prec + spr_sund + win_chill + (1|year), data = dat_sds[dat_sds$plot %in% c('Gei'),])  # intercept
+summary(mixed.lmer)
+```
+
+```{r}
+#library(MuMIn)
+r_sq_val <- r.squaredGLMM(mixed.lmer)
+print(r_sq_val)
+
+r.squaredGLMM(mixed.lmer)
+```
+
+random forest
+
+```{r}
+library(randomForest)
+forest <- tuneRF( x = dat_sds[, -which(names(dat_sds) == 'sds')],
+        y = dat_sds$sds,
+        mtryStart = 2,
+        ntreeTry = 200,
+        stepFactor = 1.5,
+        improve = 0.01,
+        plot = TRUE,
+        doBest = TRUE)
+
+rf_model <- forest
+RMSE <- min(sqrt(rf_model$mse))
+RMSE
+max(rf_model$rsq)
+```
+
+importance plot
+
+```{r}
+library(vip)
+vip(rf_model, num_features = 8, geom = "point", 
+    aesthetics = list(color = "steelblue", size = 3)) +
+  ggtitle("Variable Importance in Random Forest") +
+  theme_minimal(base_size = 15)
+
+```
+
+prepare data sd eos
+
+```{r}
+dat_sde <- dat_key[, c('log_sde', 'plot', 'year', 'Treat', 'aut_temp', 'aut_prec', 'aut_sund')]
+colnames(dat_sde) <- c('sde', 'plot', 'year', 'treat', 'aut_temp', 'aut_prec', 'aut_sund')
+dat_sde
+```
+
+linear mixed-effect model
+
+```{r}
+#library(lme4)
+#library(lmerTest)
+
+mixed.lmer <- lmer(sde ~ treat + aut_temp + aut_prec + aut_sund + (1|year) + (1|plot), data = dat_sde)  # intercept
+summary(mixed.lmer)
+```
+
+```{r}
+#library(MuMIn)
+r_sq_val <- r.squaredGLMM(mixed.lmer)
+print(r_sq_val)
+
+r.squaredGLMM(mixed.lmer)
+```

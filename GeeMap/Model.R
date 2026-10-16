@@ -454,7 +454,7 @@ for (key_i in 1:length(key_list)){
   sum_temp <- unique(sub_key$sum_temp)
   aut_temp <- unique(sub_key$aut_temp)
   win_temp <- unique(sub_key$win_temp)
-  
+
     sub_yr <- subset(sub_key, year == yr)
     # count number of non-NA pixels
     pix_sos <- sum(!is.na(sub_yr$sos))

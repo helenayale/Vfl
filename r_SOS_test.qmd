@@ -1,0 +1,53 @@
+---
+title: "Pheno_rSOS"
+author: "Haiyin Ye"
+format: html
+editor: visual
+---
+
+## Preparation
+
+library & load data
+
+```{r}
+#library(ggplot2)
+setwd('D:/GIS_Data/Vfl-oak/WekEO/')
+load('dat_wek_2024.rda')
+dat_meta <- read.csv('meta_data2.csv')
+
+dat_all$key <- paste(dat_all$ID, '_', dat_all$Parcel, sep = '')
+
+dat_all$los <- dat_all$eos - dat_all$sos
+
+dat_wek <- merge(dat_all, dat_meta, by = 'key')
+
+Treat_v <- dat_wek$Treat
+Treat_v[Treat_v== "A-Grad"] <- 'Low'
+Treat_v[Treat_v == "F-Grad" ] <- 'Medium'
+Treat_v[Treat_v == "Z-Baum" ] <- 'High'
+
+
+dat_wek$Treat_lvl <- factor(Treat_v, levels = c('Low', 'Medium', 'High'))
+dat_wek
+```
+
+DWD
+
+```{r}
+load('dat_dwd_2024.rda')
+dat_dwd$key <- paste(dat_dwd$ID, '_', dat_dwd$Parcel, sep = '')
+dat_dwd
+```
+
+```{r}
+dat_dwd$key_yr <- paste(dat_dwd$key, '_', dat_dwd$year, sep = '')
+dat_wek$key_yr <- paste(dat_wek$key, '_', dat_wek$year, sep = '')
+
+dat_dwd_add <- dat_dwd[, c('key_yr', 'spr_temp', 'sum_temp', 'aut_temp', 'win_chill', 'spr_prec', 'aut_prec', 'spr_sund', 'aut_sund', 'stebo', 'stebv')]
+dat_dwd_add
+```
+
+```{r}
+dat_merge <- merge(dat_wek, dat_dwd_add, by = 'key_yr')
+dat_merge
+```
